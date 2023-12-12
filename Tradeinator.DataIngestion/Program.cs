@@ -1,12 +1,21 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 
+using Serilog;
 using Tradeinator.Shared;
 
 string host = "localhost";
 string exchangeName = "test_exchange";
 
 using var exchange = new PublisherExchange(host, exchangeName);
+
+// initialise serilog logger, writing to console and file
+using var logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("data_ingestion.log")
+    .CreateLogger();
+
+
 
 Console.WriteLine("send message in form: msg | topic\nenter 'quit' to exit");
 Console.Write("> ");
@@ -19,7 +28,7 @@ while ((input = Console.ReadLine()) != "quit")
 
     var msg = split[0].Trim();
     var topic = split[1].Trim();
-    Console.WriteLine($"Sending message '{msg}' to exchanges listening to topic: '{topic}'");
+    logger.Information("Sending message '{@Msg}' to exchanges listening to topic: '{@Topic}'", msg, topic);
     
     exchange.Publish(msg, topic);
     
