@@ -9,22 +9,26 @@ namespace Tradeinator.Shared;
 public class ReceiverExchange: IDisposable
 {
     private ConnectionFactory _factory;
-    private string _host;
-    private string _exchangeName;
-    
     private IConnection _connection;
     private IModel _channel;
 
-    private string _queueName;
+    private readonly string _queueName;
     private string[] _bindingKeys;
-
+    private string _host;
+    private readonly string _exchangeName;
+    
     private EventingBasicConsumer _consumer;
-
     public EventHandler<BasicDeliverEventArgs>? ConsumerOnReceive = null;
 
     
 
-
+    /// <summary>
+    /// Creates a new receiver exchange
+    /// </summary>
+    /// <param name="host">the exchange host</param>
+    /// <param name="exchangeName">name of the exchange to connect to</param>
+    /// <param name="bindingKeys">topic binding keys to listen for</param>
+    /// <exception cref="ArgumentException">throws if no binding keys are passed in</exception>
     public ReceiverExchange(string host, string exchangeName, params string[] bindingKeys)
     {
         if (bindingKeys.Length == 0)
@@ -43,6 +47,8 @@ public class ReceiverExchange: IDisposable
         _channel.ExchangeDeclare(exchangeName, type: ExchangeType.Topic);
 
         _queueName = _channel.QueueDeclare().QueueName;
+        
+        // bind the channel to all binding keys passed in
         foreach (var key in bindingKeys)
         {
             _channel.QueueBind(_queueName, _exchangeName, routingKey: key);
@@ -52,9 +58,9 @@ public class ReceiverExchange: IDisposable
     }
 
     /// <summary>
-    /// Registers the consumer to the channel, throws if consumer is null
+    /// Registers the consumer callback to the channel and starts consuming
     /// </summary>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">Throws if the ConsumerOnReceive callback hasn't been set</exception>
     public void StartConsuming()
     {
         if (ConsumerOnReceive == null)
@@ -72,6 +78,5 @@ public class ReceiverExchange: IDisposable
     {
         _connection.Dispose();
         _channel.Dispose();
-        
     }
 }

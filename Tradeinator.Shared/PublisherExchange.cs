@@ -7,8 +7,9 @@ namespace Tradeinator.Shared;
 public class PublisherExchange: IDisposable
 {
     private ConnectionFactory _factory;
-    private string _host;
-    private string _exchangeName;
+    
+    private readonly string _host;
+    private readonly string _exchangeName;
     
     private IConnection _connection;
     private IModel _channel;
@@ -27,6 +28,11 @@ public class PublisherExchange: IDisposable
 
     }
 
+    /// <summary>
+    /// publish an object to the exchange
+    /// </summary>
+    /// <param name="model">model to send</param>
+    /// <param name="key">exchange topic</param>
     public void Publish(object model, string key)
     {
         var serialised = JsonSerializer.Serialize(model);
