@@ -6,12 +6,12 @@ using Tradeinator.Shared;
 string host = "localhost";
 string exchangeName = "test_exchange";
 
-using var exchange = new ReceiverExchange(host, exchangeName, "#");
+using var exchange = new ReceiverExchange(host, exchangeName, "bar.aapl");
 exchange.ConsumerOnReceive += (sender, eventArgs) =>
 {
     var body = eventArgs.Body.ToArray();
     var m = Encoding.UTF8.GetString(body);
-    Console.WriteLine($"topic: {eventArgs.RoutingKey} // message: {m} ");
+    Console.WriteLine($"{m}");
 };
 
 exchange.StartConsuming();

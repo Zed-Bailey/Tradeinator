@@ -30,7 +30,7 @@ public class PublisherExchange: IDisposable
     public void Publish(object model, string key)
     {
         var serialised = JsonSerializer.Serialize(model);
-        Console.WriteLine(serialised);
+        // Console.WriteLine(serialised);
         var body = Encoding.UTF8.GetBytes(serialised);
         
         _channel.BasicPublish(

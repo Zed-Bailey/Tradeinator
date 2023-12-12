@@ -1,6 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-
+﻿using Alpaca.Markets;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using Tradeinator.Shared;
@@ -26,21 +24,61 @@ var config = new ConfigurationBuilder()
         .AddEnvironmentVariables()
         .Build();
 
+//
 
-Console.WriteLine("send message in form: msg | topic\nenter 'quit' to exit");
-Console.Write("> ");
+var client = Environments.Paper
+    .GetAlpacaTradingClient(new SecretKey(config["ALPACA_KEY"],config["ALPACA_SECRET"]));
 
-string? input;
-while ((input = Console.ReadLine()) != "quit")
+var clock = await client.GetClockAsync();
+
+Console.WriteLine(
+    "Timestamp: {0}, NextOpen: {1}, NextClose: {2}",
+    clock.TimestampUtc, clock.NextOpenUtc, clock.NextCloseUtc);
+
+
+// var data = Environments.Paper.GetAlpacaDataStreamingClient(new SecretKey(config["ALPACA_KEY"],config["ALPACA_SECRET"]));
+// data.RegisterLoggers(logger);
+//
+//
+// var applSubscription = data.GetMinuteBarSubscription("AAPL");
+//
+// var topic = "bar.aapl";
+//
+// applSubscription.Received += bar =>
+// {
+//     var msg = new
+//     {
+//         bar.Open,
+//         bar.High,
+//         bar.Low,
+//         bar.Close
+//     };
+//
+//     exchange.Publish(msg, topic);
+// };
+//
+// await data.SubscribeAsync(applSubscription);
+//
+// Console.WriteLine(">> Press any key to exit");
+// Console.ReadLine();
+//
+// await data.UnsubscribeAsync(applSubscription);
+
+var data = Environments.Paper.GetAlpacaDataClient(new SecretKey(config["ALPACA_KEY"],config["ALPACA_SECRET"]));
+
+var startDate = new DateTime(2021, 01, 01);
+var endDate = new DateTime(2021, 2, 28);
+var page = await data.ListHistoricalBarsAsync(
+    new HistoricalBarsRequest("AAPL", startDate, endDate, BarTimeFrame.Day));
+
+
+while (true)
 {
-    var split = input.Split("|");
-    if(split.Length != 2) continue;
-
-    var msg = split[0].Trim();
-    var topic = split[1].Trim();
-    logger.Information("Sending message '{@Msg}' to exchanges listening to topic: '{@Topic}'", msg, topic);
-    
-    exchange.Publish(msg, topic);
-    
-    Console.Write("> ");
+    foreach (var bar in page.Items)
+    {
+        exchange.Publish(bar, "bar.aapl");
+        Thread.Sleep(2000);
+    }
+    Console.Write("re run: [y]/[n]: ");
+    if (Console.ReadLine() != "y") break;
 }
