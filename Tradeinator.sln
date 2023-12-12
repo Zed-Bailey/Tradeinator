@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.DataIngestion", "Tradeinator.DataIngestion\Tradeinator.DataIngestion.csproj", "{8C43EAD4-776A-4578-AD41-C434CBAEC5AC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Shared", "Tradeinator.Shared\Tradeinator.Shared.csproj", "{5E4C1124-892E-4FAE-9900-6C7DBCA3CB1D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Listener", "Tradeinator.Listener\Tradeinator.Listener.csproj", "{4EFF3DC8-F9F9-4EB0-A0DA-9D87D867729A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8C43EAD4-776A-4578-AD41-C434CBAEC5AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C43EAD4-776A-4578-AD41-C434CBAEC5AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C43EAD4-776A-4578-AD41-C434CBAEC5AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C43EAD4-776A-4578-AD41-C434CBAEC5AC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E4C1124-892E-4FAE-9900-6C7DBCA3CB1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E4C1124-892E-4FAE-9900-6C7DBCA3CB1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E4C1124-892E-4FAE-9900-6C7DBCA3CB1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E4C1124-892E-4FAE-9900-6C7DBCA3CB1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4EFF3DC8-F9F9-4EB0-A0DA-9D87D867729A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EFF3DC8-F9F9-4EB0-A0DA-9D87D867729A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EFF3DC8-F9F9-4EB0-A0DA-9D87D867729A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4EFF3DC8-F9F9-4EB0-A0DA-9D87D867729A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
