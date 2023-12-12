@@ -13,9 +13,19 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Alpaca.Markets" Version="7.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
       <PackageReference Include="Serilog" Version="3.1.1" />
       <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
       <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="appsettings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>
