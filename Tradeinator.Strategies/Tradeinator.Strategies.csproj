@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Tradeinator.Shared\Tradeinator.Shared.csproj" />
+    </ItemGroup>
+
+
+    <!-- https://stackoverflow.com/a/69323880 -->
+<!--    <ItemGroup>-->
+<!--        <Compile Remove="Strategies\**" />-->
+<!--        <Content Include="Strategies\**" />-->
+<!--    </ItemGroup>-->
+    
+    
+    <ItemGroup>
+      <PackageReference Include="CS-Script" Version="4.8.10" />
+      <PackageReference Include="Serilog" Version="3.1.1" />
+      <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
+      <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+    </ItemGroup>
+
+
+</Project>
