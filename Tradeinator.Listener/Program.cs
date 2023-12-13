@@ -6,14 +6,15 @@ using Tradeinator.Shared;
 string host = "localhost";
 string exchangeName = "test_exchange";
 
-using var exchange = new ReceiverExchange(host, exchangeName, "bar.aapl");
+using var exchange = new ReceiverExchange(host, exchangeName, "bar.*");
 exchange.ConsumerOnReceive += (sender, eventArgs) =>
 {
     var body = eventArgs.Body.ToArray();
     var m = Encoding.UTF8.GetString(body);
-    Console.WriteLine($"{m}");
+    Console.WriteLine($"{eventArgs.RoutingKey} | {m}");
 };
 
+// will register the callback above to the channel and start consuming
 exchange.StartConsuming();
 
 Console.WriteLine("Press any key to quit.");
