@@ -5,7 +5,7 @@ namespace DataIngestion;
 
 public static class StreamingClientExtensions
 {
-    public static void RegisterLoggers(this IAlpacaDataStreamingClient client, Logger logger)
+    public static void RegisterLoggers(this IStreamingClient client, Logger logger)
     {
         client.Connected += status =>
         {

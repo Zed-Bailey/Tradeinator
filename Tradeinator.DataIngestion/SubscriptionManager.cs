@@ -16,14 +16,14 @@ public class SubscriptionManager : IAsyncDisposable
     private Logger _logger;
 
     private PublisherExchange _exchange;
-    private IAlpacaDataStreamingClient _client;
+    private IAlpacaCryptoStreamingClient _client;
 
     /// <summary>
     /// path to the watched file
     /// </summary>
     public string SymbolsFile => Path.Combine(_fileSystemWatcher.Path, _fileSystemWatcher.Filter);
     
-    public SubscriptionManager(Logger logger, PublisherExchange exchange, IAlpacaDataStreamingClient client, string directoryPath, string symbolsFileName)
+    public SubscriptionManager(Logger logger, PublisherExchange exchange, IAlpacaCryptoStreamingClient client, string directoryPath, string symbolsFileName)
     {
         _subscriptions = new();
         
@@ -37,14 +37,15 @@ public class SubscriptionManager : IAsyncDisposable
         _fileSystemWatcher.EnableRaisingEvents = true;
         _fileSystemWatcher.Changed += OnSymbolsFileChanged;
         
-        // todo load file and populate
+        // load file
+        OnSymbolsFileChanged(new object(), new FileSystemEventArgs(WatcherChangeTypes.Changed, directoryPath, symbolsFileName));
     }
     
     
-    private async void OnSymbolsFileChanged(object sender, FileSystemEventArgs eventArgs)
+    private void OnSymbolsFileChanged(object sender, FileSystemEventArgs eventArgs)
     {
         if (eventArgs.ChangeType != WatcherChangeTypes.Changed) return;
-        var text = await File.ReadAllLinesAsync(Path.Combine(Directory.GetCurrentDirectory(), "symbols.txt"));
+        var text = File.ReadAllLines(Path.Combine(Directory.GetCurrentDirectory(), "symbols.txt"));
     
         _logger.Information("Symbols file changed {Path} | {Event}", eventArgs.FullPath, eventArgs.ChangeType);
     
@@ -57,7 +58,9 @@ public class SubscriptionManager : IAsyncDisposable
         {
             if (text.Contains(key)) continue;
         
-            await _client.UnsubscribeAsync(_subscriptions[key]);
+            _client.UnsubscribeAsync(_subscriptions[key]).AsTask().Wait();
+            _logger.Information("Unsubscribed {Symbol} data subscription", key);
+
             _subscriptions.Remove(key);
         }
 
@@ -65,27 +68,44 @@ public class SubscriptionManager : IAsyncDisposable
         // if not, a new data subscription is created
         foreach (var line in text)
         {
-            if (_subscriptions.ContainsKey(line)) continue;
-        
-            var newSubscription = _client.GetMinuteBarSubscription(line);
+            // trim whitespace and convert to uppercase
+            var symbol = line.Trim().ToUpper();
             
-            newSubscription.Received += bar =>
-            {
-                var msg = new
-                {
-                    bar.Open,
-                    bar.High,
-                    bar.Low,
-                    bar.Close
-                };
-                
-                // publish bar to exchange
-                _exchange.Publish(msg, $"bar.{bar.Symbol}");
-            };
+            if (_subscriptions.ContainsKey(symbol)) continue;
 
-            await _client.SubscribeAsync(newSubscription);
-            _subscriptions[line] = newSubscription;
+            var subscription = BuildNewSubscription(symbol);
+            
+            _client.SubscribeAsync(subscription).AsTask().Wait();
+            
+            _logger.Information("Created a new subscription for {Symbol}", symbol);
+            
+            _subscriptions[symbol] = subscription;
         }
+    }
+
+    private IAlpacaDataSubscription<IBar> BuildNewSubscription(string symbol)
+    {
+        var newSubscription = _client.GetMinuteBarSubscription(symbol);
+        
+        newSubscription.Received += bar =>
+        {
+            Console.WriteLine($"New {bar.Symbol} bar received");
+            var msg = new
+            {
+                bar.Open,
+                bar.High,
+                bar.Low,
+                bar.Close,
+                bar.TimeUtc,
+            };
+                
+            // publish bar to exchange
+            _exchange.Publish(msg, $"bar.{bar.Symbol}");
+        };
+
+        newSubscription.OnSubscribedChanged += () =>  _logger.Information("Subscription changed for {Symbol}", symbol);
+        
+        return newSubscription;
     }
 
     public ValueTask DisposeAsync()
