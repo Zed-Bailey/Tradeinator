@@ -6,7 +6,10 @@ using Tradeinator.Shared;
 string host = "localhost";
 string exchangeName = "test_exchange";
 
+
 using var exchange = new ReceiverExchange(host, exchangeName, "bar.*");
+
+
 exchange.ConsumerOnReceive += (sender, eventArgs) =>
 {
     var body = eventArgs.Body.ToArray();
@@ -15,7 +18,4 @@ exchange.ConsumerOnReceive += (sender, eventArgs) =>
 };
 
 // will register the callback above to the channel and start consuming
-exchange.StartConsuming();
-
-Console.WriteLine("Press any key to quit.");
-Console.ReadLine();
+await exchange.StartConsuming();
