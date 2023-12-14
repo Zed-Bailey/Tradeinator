@@ -15,17 +15,23 @@ public static class BasicDeliverEventArgsExtension
     /// <returns>the deserialized type, or null if deserialization failed</returns>
     public static T? SerializeToModel<T>(this BasicDeliverEventArgs args)
     {
-        var body = args.Body.ToArray();
-        // this should be a json string
-        var m = Encoding.UTF8.GetString(body);
         try
         {
-            return JsonSerializer.Deserialize<T>(m);
+            // string should be a json string
+            var body = args.BodyAsString();
+            
+            return JsonSerializer.Deserialize<T>(body);
         }
         catch (Exception e)
         {
             return default;
         }
+    }
+
+    public static string BodyAsString(this BasicDeliverEventArgs args)
+    {
+        var body = args.Body.ToArray();
+        return Encoding.UTF8.GetString(body);
     }
     
 }
