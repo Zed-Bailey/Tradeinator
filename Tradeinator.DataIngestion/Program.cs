@@ -63,8 +63,16 @@ await using var subscriptionManager = new SubscriptionManager(logger, exchange, 
 
 logger.Information("Started watching symbols file: {Path}", subscriptionManager.SymbolsFile);
 
-Console.WriteLine(">> Press any key to exit");
-Console.ReadLine();
+var tokenSource = new CancellationTokenSource();
+
+Console.CancelKeyPress += (sender, eventArgs) =>
+{
+    logger.Information("Cancellation Requested");
+    subscriptionManager.UnsubscribeFromAll().Wait();
+    tokenSource.Cancel();
+};
+
+await Task.Delay(-1, tokenSource.Token);
 
 
 // var data = Environments.Paper.GetAlpacaDataClient(new SecretKey(config["ALPACA_KEY"],config["ALPACA_SECRET"]));

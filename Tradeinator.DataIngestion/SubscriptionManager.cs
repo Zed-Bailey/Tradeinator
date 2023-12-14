@@ -40,7 +40,17 @@ public class SubscriptionManager : IAsyncDisposable
         // load file
         OnSymbolsFileChanged(new object(), new FileSystemEventArgs(WatcherChangeTypes.Changed, directoryPath, symbolsFileName));
     }
-    
+
+    /// <summary>
+    /// Un subscribe from all registered data streams
+    /// </summary>
+    /// <returns></returns>
+    public Task UnsubscribeFromAll()
+    {
+        var subs = _subscriptions.Values;
+        _logger.Information("Unsubscribing from all streams");
+        return _client.UnsubscribeAsync(subs).AsTask();
+    }
     
     private void OnSymbolsFileChanged(object sender, FileSystemEventArgs eventArgs)
     {
