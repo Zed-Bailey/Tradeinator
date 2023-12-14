@@ -59,9 +59,10 @@ public class ReceiverExchange: IDisposable
 
     /// <summary>
     /// Registers the consumer callback to the channel and starts consuming
+    /// returns a task that waits indefinitely or until the cancellation token is triggered
     /// </summary>
     /// <exception cref="ArgumentNullException">Throws if the ConsumerOnReceive callback hasn't been set</exception>
-    public void StartConsuming()
+    public Task StartConsuming(CancellationToken token = default(CancellationToken))
     {
         if (ConsumerOnReceive == null)
         {
@@ -70,6 +71,8 @@ public class ReceiverExchange: IDisposable
         
         _consumer.Received += ConsumerOnReceive;
         _channel.BasicConsume(_queueName, true, _consumer);
+
+        return Task.Delay(-1, token);
     }
     
 
