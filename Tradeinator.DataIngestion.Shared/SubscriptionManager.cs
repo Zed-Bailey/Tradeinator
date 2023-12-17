@@ -4,7 +4,7 @@ using Tradeinator.Shared;
 
 namespace Tradeinator.DataIngestion.Shared;
 
-public class SubscriptionManager : IAsyncDisposable
+public abstract class SubscriptionManager : IAsyncDisposable
 {
 
     /// <summary>
@@ -16,21 +16,20 @@ public class SubscriptionManager : IAsyncDisposable
     private Logger _logger;
 
     private PublisherExchange _exchange;
-    private IAlpacaCryptoStreamingClient _client;
 
     /// <summary>
     /// path to the watched file
     /// </summary>
     public string SymbolsFile => Path.Combine(_fileSystemWatcher.Path, _fileSystemWatcher.Filter);
     
-    public SubscriptionManager(Logger logger, PublisherExchange exchange, IAlpacaCryptoStreamingClient client, string directoryPath, string symbolsFileName)
+    public SubscriptionManager(Logger logger, PublisherExchange exchange, string directoryPath, string symbolsFileName)
     {
         _subscriptions = new();
         
         _logger = logger;
         _exchange = exchange;
         _exchange = exchange;
-        _client = client;
+        
         
         _fileSystemWatcher = new FileSystemWatcher(directoryPath);
         _fileSystemWatcher.Filter = symbolsFileName;
@@ -40,6 +39,11 @@ public class SubscriptionManager : IAsyncDisposable
         // load file
         OnSymbolsFileChanged(new object(), new FileSystemEventArgs(WatcherChangeTypes.Changed, directoryPath, symbolsFileName));
     }
+    
+    public abstract ValueTask Subscribe(params IAlpacaDataSubscription<IBar>[] subscriptions);
+    public abstract ValueTask UnSubscribe(params IAlpacaDataSubscription<IBar>[] subscriptions);
+    public abstract IAlpacaDataSubscription<IBar> GetSubscription(string symbol);
+    
 
     /// <summary>
     /// Un subscribe from all registered data streams
@@ -49,8 +53,10 @@ public class SubscriptionManager : IAsyncDisposable
     {
         var subs = _subscriptions.Values;
         _logger.Information("Unsubscribing from all streams");
-        return _client.UnsubscribeAsync(subs).AsTask();
+        return UnSubscribe(subs.ToArray()).AsTask();
     }
+
+    
     
     private void OnSymbolsFileChanged(object sender, FileSystemEventArgs eventArgs)
     {
@@ -68,7 +74,9 @@ public class SubscriptionManager : IAsyncDisposable
         {
             if (text.Contains(key)) continue;
         
-            _client.UnsubscribeAsync(_subscriptions[key]).AsTask().Wait();
+            
+            UnSubscribe(_subscriptions[key]).AsTask().Wait();
+            
             _logger.Information("Unsubscribed {Symbol} data subscription", key);
 
             _subscriptions.Remove(key);
@@ -85,7 +93,7 @@ public class SubscriptionManager : IAsyncDisposable
 
             var subscription = BuildNewSubscription(symbol);
             
-            _client.SubscribeAsync(subscription).AsTask().Wait();
+            Subscribe(subscription).AsTask().Wait();
             
             _logger.Information("Created a new subscription for {Symbol}", symbol);
             
@@ -95,7 +103,7 @@ public class SubscriptionManager : IAsyncDisposable
 
     private IAlpacaDataSubscription<IBar> BuildNewSubscription(string symbol)
     {
-        var newSubscription = _client.GetMinuteBarSubscription(symbol);
+        var newSubscription = GetSubscription(symbol);
         
         newSubscription.Received += bar =>
         {
@@ -122,7 +130,7 @@ public class SubscriptionManager : IAsyncDisposable
     {
         _fileSystemWatcher.Dispose();
 
-        return _client.UnsubscribeAsync(_subscriptions.Values);
+        return UnSubscribe(_subscriptions.Values.ToArray());
     }
     
 }
