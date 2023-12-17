@@ -13,7 +13,10 @@ public class ReceiverExchange: IDisposable
     private IModel _channel;
 
     private readonly string _queueName;
+   
     private string[] _bindingKeys;
+    public string[] Bindings => _bindingKeys;
+    
     private string _host;
     private readonly string _exchangeName;
     

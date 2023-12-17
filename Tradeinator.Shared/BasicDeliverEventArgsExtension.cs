@@ -13,7 +13,7 @@ public static class BasicDeliverEventArgsExtension
     /// <param name="args">the event args</param>
     /// <typeparam name="T">the type to convert to</typeparam>
     /// <returns>the deserialized type, or null if deserialization failed</returns>
-    public static T? SerializeToModel<T>(this BasicDeliverEventArgs args)
+    public static T? DeserializeToModel<T>(this BasicDeliverEventArgs args)
     {
         try
         {
