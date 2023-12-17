@@ -75,21 +75,3 @@ Console.CancelKeyPress += (sender, eventArgs) =>
 await Task.Delay(-1, tokenSource.Token);
 
 
-// var data = Environments.Paper.GetAlpacaDataClient(new SecretKey(config["ALPACA_KEY"],config["ALPACA_SECRET"]));
-//
-// var startDate = new DateTime(2021, 01, 01);
-// var endDate = new DateTime(2021, 2, 28);
-// var page = await data.ListHistoricalBarsAsync(
-//     new HistoricalBarsRequest("AAPL", startDate, endDate, BarTimeFrame.Day));
-//
-//
-// while (true)
-// {
-//     foreach (var bar in page.Items)
-//     {
-//         exchange.Publish(bar, $"bar.{bar.Symbol}");
-//         Thread.Sleep(2000);
-//     }
-//     Console.Write("re run: [y]/[n]: ");
-//     if (Console.ReadLine() != "y") break;
-// }
