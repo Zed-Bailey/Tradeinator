@@ -66,7 +66,16 @@ public abstract class SubscriptionManager : IAsyncDisposable
         _logger.Information("Symbols file changed {Path} | {Event}", eventArgs.FullPath, eventArgs.ChangeType);
     
         // no symbols in file
-        if (text.Length == 0) return;
+        if (text.Length == 0)
+        {
+            // deleted all symbols in file, but still have subscriptions
+            if (_subscriptions.Count > 0)
+            {
+                UnsubscribeFromAll().Wait();
+            }
+
+            return;
+        }
     
         // loop through the subscripts and check the keys, if the key doesn't exist then the the 
         // streaming subscription is unsubscribed
