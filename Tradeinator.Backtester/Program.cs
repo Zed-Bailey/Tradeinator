@@ -17,9 +17,6 @@ if (args.Length > 0)
 }
 
 DotEnv.LoadEnvFiles(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
-var configuration = new ConfigurationBuilder()
-    .AddEnvironmentVariables()
-    .Build();
 
 // load the config
 var config = new ConfigurationBuilder()
