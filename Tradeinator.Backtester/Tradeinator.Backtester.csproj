@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Alpaca.Markets" Version="7.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />
+      <PackageReference Include="OoplesFinance.StockIndicators" Version="1.0.53" />
+      <PackageReference Include="SimpleBacktestLib" Version="2023.5.19.947" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Tradeinator.Shared\Tradeinator.Shared.csproj" />
+      <ProjectReference Include="..\Tradeinator.Strategy.MeanReversion\Tradeinator.Strategy.MeanReversion.csproj" />
+    </ItemGroup>
+
+</Project>
