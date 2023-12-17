@@ -2,7 +2,7 @@ using Alpaca.Markets;
 using Serilog.Core;
 using Tradeinator.Shared;
 
-namespace DataIngestion;
+namespace Tradeinator.DataIngestion.Shared;
 
 public class SubscriptionManager : IAsyncDisposable
 {

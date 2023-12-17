@@ -1,7 +1,7 @@
 using Alpaca.Markets;
 using Serilog.Core;
 
-namespace DataIngestion;
+namespace Tradeinator.DataIngestion.Shared;
 
 public static class StreamingClientExtensions
 {

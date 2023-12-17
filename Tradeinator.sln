@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Strategy.Shared
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.DataIngestionCrypto", "Tradeinator.DataIngestionCrypto\Tradeinator.DataIngestionCrypto.csproj", "{4E4BC102-088E-4965-887D-CFE5DE2ED0C7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.DataIngestion.Shared", "Tradeinator.DataIngestion.Shared\Tradeinator.DataIngestion.Shared.csproj", "{5DB2F29D-867F-465C-B509-B3AFCBDF0B69}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 		{4E4BC102-088E-4965-887D-CFE5DE2ED0C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E4BC102-088E-4965-887D-CFE5DE2ED0C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E4BC102-088E-4965-887D-CFE5DE2ED0C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5DB2F29D-867F-465C-B509-B3AFCBDF0B69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DB2F29D-867F-465C-B509-B3AFCBDF0B69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DB2F29D-867F-465C-B509-B3AFCBDF0B69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DB2F29D-867F-465C-B509-B3AFCBDF0B69}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

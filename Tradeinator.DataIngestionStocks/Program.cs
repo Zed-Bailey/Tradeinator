@@ -1,7 +1,7 @@
 ﻿using Alpaca.Markets;
-using DataIngestion;
 using Microsoft.Extensions.Configuration;
 using Serilog;
+using Tradeinator.DataIngestion.Shared;
 using Tradeinator.Shared;
 
 // load the dotenv file into the environment
