@@ -3,9 +3,9 @@ using OoplesFinance.StockIndicators;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Models;
 using SimpleBacktestLib;
-using Tradeinator.Strategy.MeanReversion;
+using Tradeinator.Backtester.Helpers;
 
-namespace Tradeinator.Backtester;
+namespace Tradeinator.Backtester.Strategies;
 
 public class MeanReversionBacktest : IBacktestRunner
 {
@@ -17,10 +17,12 @@ public class MeanReversionBacktest : IBacktestRunner
     private decimal atPrice;
 
     private StockData _stockData;
-    
-    
 
-    public async Task InitStrategy(string symbol, DateTime startDate, IAlpacaCryptoDataClient dataClient)
+
+    public DateTime FromDate { get; set; } = new DateTime(2020, 1, 1);
+    public DateTime ToDate { get; set; } = DateTime.Today;
+
+    public async Task InitStrategy(string symbol, IAlpacaCryptoDataClient dataClient)
     { }
 
     public void OnTick(BacktestState state)
@@ -46,10 +48,7 @@ public class MeanReversionBacktest : IBacktestRunner
         var thirty = _stockData.CalculateSimpleMovingAverage(30);
         _stockData.Clear();
 
-        // if (thirty.OutputValues["SMA30"] < ninety.OutputValues["SMA90"])
-        // {
-        //     
-        // }
+       
 
 
     }

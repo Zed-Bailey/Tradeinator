@@ -1,12 +1,12 @@
 ﻿using System.Diagnostics;
-using System.Formats.Tar;
 using System.Text;
 using Alpaca.Markets;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Core;
 using SimpleBacktestLib;
-using Tradeinator.Backtester;
+using Tradeinator.Backtester.Helpers;
+using Tradeinator.Backtester.Strategies;
 using Tradeinator.Shared;
 
 var SYMBOL = "BTC/USD";
@@ -36,9 +36,6 @@ if (key == null || secret == null)
     throw new ArgumentNullException(key ?? secret);
 }
 
-// var fromDate = new DateTime(2020, 01, 01);
-var fromDate = DateTime.Today.AddDays(-10);
-var toDate = DateTime.Today;
 
 var dataClient = Environments.Paper.GetAlpacaCryptoDataClient(new SecretKey(key, secret));
 
@@ -51,17 +48,18 @@ IBacktestRunner backtest = new DelayedMovingAverageCrossOver();
 //     .WriteTo.File(nameof(backtest) + ".log")
 //     .CreateLogger();
 
-var candleData = await GetData(SYMBOL, fromDate, toDate);
+var candleData = await GetData(SYMBOL, backtest.FromDate, backtest.ToDate);
 
 // initialise the strategy
 // this could do things like preload past data
-await backtest.InitStrategy(SYMBOL, fromDate, dataClient);
+await backtest.InitStrategy(SYMBOL, dataClient);
 
 //
 //
 //
 var builder = BacktestBuilder.CreateBuilder(candleData)
     .WithQuoteBudget(150)
+    .WithBaseBudget(150)
     .WithDefaultMarginLongOrderSize(AmountType.Percentage, 10)
     .WithDefaultMarginShortOrderSize(AmountType.Percentage, 10)
     .OnTick(state =>

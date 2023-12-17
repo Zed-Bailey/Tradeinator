@@ -3,8 +3,9 @@ using OoplesFinance.StockIndicators;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Models;
 using SimpleBacktestLib;
+using Tradeinator.Backtester.Helpers;
 
-namespace Tradeinator.Backtester;
+namespace Tradeinator.Backtester.Strategies;
 
 public class DelayedMovingAverageCrossOver : IBacktestRunner
 {
@@ -13,11 +14,14 @@ public class DelayedMovingAverageCrossOver : IBacktestRunner
     
     private int? _positionId;
 
-    public async Task InitStrategy(string symbol, DateTime startDate, IAlpacaCryptoDataClient dataClient)
-    {
-        var from = startDate.AddHours(-100);
+    public DateTime FromDate { get; set; } = DateTime.Today.AddHours(-10);
+    public DateTime ToDate { get; set; } = DateTime.Today;
 
-        var data = await dataClient.ListHistoricalBarsAsync(new HistoricalCryptoBarsRequest(symbol, from, startDate, BarTimeFrame.Hour));
+    public async Task InitStrategy(string symbol, IAlpacaCryptoDataClient dataClient)
+    {
+        var from = FromDate.AddHours(-100);
+
+        var data = await dataClient.ListHistoricalBarsAsync(new HistoricalCryptoBarsRequest(symbol, from, FromDate, BarTimeFrame.Hour));
         var bars = data.Items;
         foreach (var b in bars)
         {
@@ -31,8 +35,6 @@ public class DelayedMovingAverageCrossOver : IBacktestRunner
                 Date = b.TimeUtc
             });
         }
-        // _data = new StockData(bars.Select(x => (double) x.Open), bars.Select(x => (double)x.High), bars.Select(x => (double)x.Low), bars.Select(x => (double)x.Close), bars.Select(x => (double)x.Volume), bars.Select(x => x.TimeUtc));
-        // Console.WriteLine(_data.Count);
     }
 
     public void OnTick(BacktestState state)
