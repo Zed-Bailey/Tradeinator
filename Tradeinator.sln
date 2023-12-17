@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.DataIngestion", "Tradeinator.DataIngestion\Tradeinator.DataIngestion.csproj", "{8C43EAD4-776A-4578-AD41-C434CBAEC5AC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.DataIngestionStocks", "Tradeinator.DataIngestionStocks\Tradeinator.DataIngestionStocks.csproj", "{8C43EAD4-776A-4578-AD41-C434CBAEC5AC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Shared", "Tradeinator.Shared\Tradeinator.Shared.csproj", "{5E4C1124-892E-4FAE-9900-6C7DBCA3CB1D}"
 EndProject
@@ -11,6 +11,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Backtester", "Tradeinator.Backtester\Tradeinator.Backtester.csproj", "{9BBCA798-1C4E-4C7F-9F5E-FF01481CFF76}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Strategy.Shared", "Tradeinator.Strategy.Shared\Tradeinator.Strategy.Shared.csproj", "{BB2C97F6-2AF4-4121-B91F-4743FAA846B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.DataIngestionCrypto", "Tradeinator.DataIngestionCrypto\Tradeinator.DataIngestionCrypto.csproj", "{4E4BC102-088E-4965-887D-CFE5DE2ED0C7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,5 +44,9 @@ Global
 		{BB2C97F6-2AF4-4121-B91F-4743FAA846B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB2C97F6-2AF4-4121-B91F-4743FAA846B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB2C97F6-2AF4-4121-B91F-4743FAA846B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E4BC102-088E-4965-887D-CFE5DE2ED0C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E4BC102-088E-4965-887D-CFE5DE2ED0C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E4BC102-088E-4965-887D-CFE5DE2ED0C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E4BC102-088E-4965-887D-CFE5DE2ED0C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
