@@ -44,7 +44,7 @@ Console.WriteLine(
 
 
 
-using var dataStreaming = Environments.Paper.GetAlpacaDataStreamingClient(new SecretKey(config["ALPACA_KEY"],config["ALPACA_SECRET"]));
+using var dataStreaming = Environments.Paper.GetAlpacaCryptoStreamingClient(new SecretKey(config["ALPACA_KEY"],config["ALPACA_SECRET"]));
 dataStreaming.RegisterLoggers(logger);
 
 var authStatus = await dataStreaming.ConnectAndAuthenticateAsync();
@@ -57,7 +57,7 @@ if (authStatus == AuthStatus.Unauthorized || authStatus == AuthStatus.TooManyCon
 
 
 // watches the symbols file and will subscribe and unsubscribe from data streams when the file changes
-await using var subscriptionManager = new StockSubscriptionManager(logger, exchange, dataStreaming, Directory.GetCurrentDirectory(), "symbols.txt");
+await using var subscriptionManager = new CryptoSubscriptionManager(logger, exchange, dataStreaming, Directory.GetCurrentDirectory(), "symbols.txt");
 
 logger.Information("Started watching symbols file: {Path}", subscriptionManager.SymbolsFile);
 

@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.DataIngestionStocks", "Tradeinator.DataIngestionStocks\Tradeinator.DataIngestionStocks.csproj", "{8C43EAD4-776A-4578-AD41-C434CBAEC5AC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.DataIngestion.Stocks", "Tradeinator.DataIngestion.Stocks\Tradeinator.DataIngestion.Stocks.csproj", "{8C43EAD4-776A-4578-AD41-C434CBAEC5AC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Shared", "Tradeinator.Shared\Tradeinator.Shared.csproj", "{5E4C1124-892E-4FAE-9900-6C7DBCA3CB1D}"
 EndProject
@@ -12,7 +12,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Backtester", "T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Strategy.Shared", "Tradeinator.Strategy.Shared\Tradeinator.Strategy.Shared.csproj", "{BB2C97F6-2AF4-4121-B91F-4743FAA846B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.DataIngestionCrypto", "Tradeinator.DataIngestionCrypto\Tradeinator.DataIngestionCrypto.csproj", "{4E4BC102-088E-4965-887D-CFE5DE2ED0C7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.DataIngestion.Crypto", "Tradeinator.DataIngestion.Crypto\Tradeinator.DataIngestion.Crypto.csproj", "{4E4BC102-088E-4965-887D-CFE5DE2ED0C7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.DataIngestion.Shared", "Tradeinator.DataIngestion.Shared\Tradeinator.DataIngestion.Shared.csproj", "{5DB2F29D-867F-465C-B509-B3AFCBDF0B69}"
 EndProject
