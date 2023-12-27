@@ -17,5 +17,6 @@ exchange.ConsumerOnReceive += (sender, eventArgs) =>
     Console.WriteLine($"{eventArgs.RoutingKey} | {m}");
 };
 
+Console.WriteLine("Exchange setup, ready to start consuming");
 // will register the callback above to the channel and start consuming
 await exchange.StartConsuming();
