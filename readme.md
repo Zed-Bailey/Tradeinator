@@ -39,7 +39,7 @@ Provides a framework for quickly backtesting strategies using the `SimpleBackTes
 ## Tradeinator.EventTester
 A Terminal GUI program to connect to the exchange and easily send test events
 <img alt="event tester demo image" src="docs/images/event_tester_demo.png"/>
-
+Built with the Terminal.Gui library
 
 ## Tradeinator.DataIngestion.Shared
 Contains the implementation of the file watching and subscription management
