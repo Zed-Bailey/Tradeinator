@@ -29,13 +29,23 @@ public class PublisherExchange: IDisposable
     }
 
     /// <summary>
-    /// publish an object to the exchange
+    /// publish an object with topic to the exchange
     /// </summary>
-    /// <param name="model">model to send</param>
+    /// <param name="model">model to send. if type is string, will send the string else will json serialise the object</param>
     /// <param name="key">exchange topic</param>
     public void Publish(object model, string key)
     {
-        var serialised = JsonSerializer.Serialize(model);
+        string serialised;
+        // if the model is already a string type, assume that it has already been serialised
+        if (model is string s)
+        {
+            serialised = s;
+        }
+        else
+        {
+            serialised = JsonSerializer.Serialize(model);
+        }
+        
         // Console.WriteLine(serialised);
         var body = Encoding.UTF8.GetBytes(serialised);
         
