@@ -21,6 +21,7 @@ public class MeanReversionBacktest : IBacktestRunner
 
     public DateTime FromDate { get; set; } = new DateTime(2020, 1, 1);
     public DateTime ToDate { get; set; } = DateTime.Today;
+    public BarTimeFrame TimeFrame { get; set; } = BarTimeFrame.Day;
 
     public async Task InitStrategy(string symbol, IAlpacaCryptoDataClient dataClient)
     { }

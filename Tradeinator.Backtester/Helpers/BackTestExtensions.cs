@@ -18,6 +18,11 @@ public static class BackTestExtensions
         };
     }
 
+    public static BacktestTrade GetLastSpotTrade(this BacktestState s)
+    {
+        return s.GetAllSpotTrades().Last();
+    }
+
     public static double LatestValue(this StockData data, string name)
     {
         return data.OutputValues[name].LastOrDefault();

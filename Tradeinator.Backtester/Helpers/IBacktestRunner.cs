@@ -5,9 +5,12 @@ namespace Tradeinator.Backtester.Helpers;
 
 public interface IBacktestRunner
 {
-    public abstract DateTime FromDate { get; set; }
-    public abstract DateTime ToDate { get; set; }
-    
+    public DateTime FromDate { get; set; }
+    public DateTime ToDate { get; set; }
+    public BarTimeFrame TimeFrame { get; set; } 
+        
     Task InitStrategy(string symbol, IAlpacaCryptoDataClient dataClient);
     void OnTick(BacktestState state);
+
+    string ExtraDetails() => "";
 }
