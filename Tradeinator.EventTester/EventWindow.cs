@@ -14,7 +14,7 @@ public class EventWindow : Window
         
         Title = "Event Tester (Ctrl+Q to quit)";
         
-        var top = AddExchangeConnectControls();
+        var top = CreateExchangeConnectControls();
         var bottom = CreateEventInputs();
 
         bottom.Y = Pos.Bottom(top) - 1;
@@ -22,6 +22,10 @@ public class EventWindow : Window
         Add(top, bottom);
     }
 
+    /// <summary>
+    /// Create the controls for entering the event topic and the event json
+    /// </summary>
+    /// <returns>A FrameView containing the controls</returns>
     private FrameView CreateEventInputs()
     {
         var fView = new FrameView();
@@ -100,7 +104,11 @@ public class EventWindow : Window
         _exchange?.Dispose();
     }
 
-    private FrameView AddExchangeConnectControls()
+    /// <summary>
+    /// Create the controls for connecting to the exchange
+    /// </summary>
+    /// <returns>A FrameView containing the controls</returns>
+    private FrameView CreateExchangeConnectControls()
     {
         var fView = new FrameView();
         fView.Width = Dim.Fill();
@@ -134,7 +142,7 @@ public class EventWindow : Window
         };
 
         // Create login button
-        var btnLogin = new Button () {
+        var btnConnect = new Button () {
             Text = "Connect",
             Y = Pos.Bottom(exchangeLabel) + 1,
         };
@@ -142,7 +150,7 @@ public class EventWindow : Window
         var btnDisconnect = new Button()
         {
             Text = "Disconnect",
-            X = Pos.Right(btnLogin) + 1,
+            X = Pos.Right(btnConnect) + 1,
             Y = Pos.Bottom(exchangeLabel) + 1
         };
 
@@ -160,7 +168,7 @@ public class EventWindow : Window
         };
 
         // When login button is clicked display a message popup
-        btnLogin.Clicked += () =>
+        btnConnect.Clicked += () =>
         {
             
             if (!_isConnected && !hostText.Text.IsEmpty && !exchangeText.Text.IsEmpty)
@@ -185,7 +193,7 @@ public class EventWindow : Window
         };
 
         // Add the views to the Window
-        fView.Add(hostLabel, hostText, exchangeLabel, exchangeText, btnLogin, btnDisconnect);
+        fView.Add(hostLabel, hostText, exchangeLabel, exchangeText, btnConnect, btnDisconnect);
         
         return fView;
     }
