@@ -5,8 +5,8 @@ namespace Tradeinator.EventTester;
 
 public class EventWindow : Window
 {
-    private PublisherExchange _exchange;
-    private bool isConnected = false;
+    private PublisherExchange? _exchange;
+    private bool _isConnected;
     
     
     public EventWindow()
@@ -67,7 +67,7 @@ public class EventWindow : Window
         
         postButton.Clicked += () =>
         {
-            if (!isConnected)
+            if (!_isConnected)
             {
                 MessageBox.ErrorQuery("Error", "Not connected", "Ok");
                 return;
@@ -82,7 +82,7 @@ public class EventWindow : Window
                 return;
             }
             
-            _exchange.Publish((string) json, (string) topic);
+            _exchange?.Publish((string) json, (string) topic);
 
         };
         
@@ -148,10 +148,10 @@ public class EventWindow : Window
 
         btnDisconnect.Clicked += () =>
         {
-            if (isConnected)
+            if (_isConnected)
             {
-                _exchange.Dispose();
-                isConnected = false;
+                _exchange?.Dispose();
+                _isConnected = false;
             }
             else
             {
@@ -163,15 +163,15 @@ public class EventWindow : Window
         btnLogin.Clicked += () =>
         {
             
-            if (!isConnected && !hostText.Text.IsEmpty && !exchangeText.Text.IsEmpty)
+            if (!_isConnected && !hostText.Text.IsEmpty && !exchangeText.Text.IsEmpty)
             {
                 try
                 {
-                    _exchange = new PublisherExchange(hostText.Text.ToString(), exchangeText.Text.ToString());
-                    isConnected = true;
+                    _exchange = new PublisherExchange((string) hostText.Text, (string) exchangeText.Text);
+                    _isConnected = true;
                     MessageBox.Query("Connected", "Connected to exchange", "Yay");
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     MessageBox.ErrorQuery("Connection Error", "Failed to connect to broker", "Ok");
                 }
