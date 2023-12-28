@@ -22,7 +22,7 @@ Event topics should follow the general format of `{action}.{symbol}`
 eg. `bar.AAPL` is the topic for a new Apple bar
 
 ## Adding new symbols
-To add new symbols without having to stop and restart the system a filewatcher is implemented
+To add new symbols without having to stop and restart the system a file watcher is implemented
 using the [.net file system watcher](https://learn.microsoft.com/en-us/dotnet/api/system.io.filesystemwatcher?view=net-8.0)
 the `symbols.txt` file in the stocks/crypto `DataIngestion` project is watched.
 The system has a file watcher registered to this file, when the file changes symbol subscriptions are added or removed
@@ -39,7 +39,7 @@ Provides a framework for quickly backtesting strategies using the `SimpleBackTes
 ## Tradeinator.EventTester
 A Terminal GUI program to connect to the exchange and easily send test events
 <img alt="event tester demo image" src="docs/images/event_tester_demo.png"/>
-Built with the Terminal.Gui library
+Built with the `Terminal.Gui` library
 
 ## Tradeinator.DataIngestion.Shared
 Contains the implementation of the file watching and subscription management
@@ -58,13 +58,15 @@ Symbols to subscribe to are registered in the projects `symbols.txt` file
 ## Tradeinator.Shared
 This project provides shared classes for the solution, such as the exchange implementations and some generic models
 
----
-
 ## Tradeinator.Notifications
-**This project is not currently implemented**
 
-The aim of this project will be to implement a discord notification system, this will provide live logs for buy and sell orders
-or when a critical error occurs
+This project implements a notification system using a discord bot,
+it listens to all events with the `notification.*` topic and publishes the events to discord.
+
+A notification is the `Tradeinator.Shared.SystemMessage` class.
+When the SystemMessages priority is `Critical` then the notification will add an `@everyone` mention
+
+---
 
 ## Tradeinator.Logger
 **This project is not currently implemented**
