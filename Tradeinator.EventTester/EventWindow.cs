@@ -160,6 +160,7 @@ public class EventWindow : Window
             {
                 _exchange?.Dispose();
                 _isConnected = false;
+                MessageBox.Query("Disconnected", "Disconnected from exchange", "Ok");
             }
             else
             {
