@@ -39,6 +39,7 @@ The meta data attribute defines some properties of the strategy such as it's nam
 
 When running the backtest the assembly is scanned for all classes that have the attribute applied. 
 Options are then displayed allowing you to select which backtest to run (see image below)
+
 <img src="docs/images/backtest_runner_example.png" title="an example of the options displayed to the user"/>
 
 Spectre.Console is used to pretty print options to the console
