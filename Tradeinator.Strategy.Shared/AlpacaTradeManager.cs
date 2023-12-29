@@ -11,7 +11,9 @@ public class AlpacaTradeManager: ITradeManager, IDisposable
         _alpacaTradingClient = Environments.Paper.GetAlpacaTradingClient(new SecretKey(key, secret));
     }
     
-    public async Task SubmitOrder(string symbol, int quantity, decimal price, OrderSide side)
+ 
+    public async Task SubmitOrder(string symbol, int quantity, decimal price, OrderSide side, decimal? stopLoss = null,
+        decimal? takeProfit = null)
     {
         // empty order
         if (quantity == 0) return;
@@ -19,14 +21,13 @@ public class AlpacaTradeManager: ITradeManager, IDisposable
         {
             // var order = await _alpacaTradingClient.PostOrderAsync(
             //     side.Limit(symbol, quantity, price));
-
+            
             
         }
         catch (Exception e)
         {
             Console.WriteLine("Warning: " + e.Message); //-V5621
         }
-         
     }
 
     public object GetUnderlyingClient()
