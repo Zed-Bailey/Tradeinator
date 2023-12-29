@@ -11,20 +11,20 @@ namespace Tradeinator.Backtester.Strategies;
 [BackTestStrategyMetadata("Trend Trading")]
 public class TrendTrading : IBacktestRunner
 {
-    public DateTime FromDate { get; set; }
-    public DateTime ToDate { get; set; }
-    public BarTimeFrame TimeFrame { get; set; }
+    public override DateTime FromDate { get; set; }
+    public override DateTime ToDate { get; set; }
+    public override BarTimeFrame TimeFrame { get; set; }
 
     private List<TickerData> _tickerData = new();
 
     bool _tradeOpen = false;
     
-    public Task InitStrategy(string symbol, IAlpacaCryptoDataClient dataClient)
+    public override Task InitStrategy(string symbol, IAlpacaCryptoDataClient dataClient)
     {
         return Task.CompletedTask;
     }
 
-    public void OnTick(BacktestState state)
+    public override void OnTick(BacktestState state)
     {
         var candle = state.GetCurrentCandle();
         _tickerData.Add(candle.CandleToTicker());

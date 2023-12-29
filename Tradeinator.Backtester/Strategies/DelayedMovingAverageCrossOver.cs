@@ -16,15 +16,17 @@ public class DelayedMovingAverageCrossOver : IBacktestRunner
     private int? _positionId;
 
     private bool _positionOpen = false;
-    public DateTime FromDate { get; set; } = new DateTime(2020, 01, 01);
-    public DateTime ToDate { get; set; } = new DateTime(2023, 01, 01);
-
+    
+    public override DateTime FromDate { get; set; } = new DateTime(2020, 01, 01);
+    public override DateTime ToDate { get; set; } = new DateTime(2023, 01, 01);
+    public override BarTimeFrame TimeFrame { get; set; } = BarTimeFrame.Hour;
+    
     private decimal qty = 0;
     private decimal scale = 200;
     
-    public BarTimeFrame TimeFrame { get; set; } = BarTimeFrame.Hour;
+    
 
-    public async Task InitStrategy(string symbol, IAlpacaCryptoDataClient dataClient)
+    public override async Task InitStrategy(string symbol, IAlpacaCryptoDataClient dataClient)
     {
         var from = FromDate.AddMonths(-1);
 
@@ -44,7 +46,7 @@ public class DelayedMovingAverageCrossOver : IBacktestRunner
         }
     }
 
-    public void OnTick(BacktestState state)
+    public override void OnTick(BacktestState state)
     {
         var candle = state.GetCurrentCandle();
         _tickerData.Add(candle.CandleToTicker());

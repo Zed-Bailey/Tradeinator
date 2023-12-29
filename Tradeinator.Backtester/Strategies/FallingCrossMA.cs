@@ -25,11 +25,11 @@ public class FallingCrossMA : IBacktestRunner
     decimal TP = 0;
     
     
-    public DateTime FromDate { get; set; } = new DateTime(2020, 01, 01);
-    public DateTime ToDate { get; set; } = new DateTime(2023, 01, 01);
-    public BarTimeFrame TimeFrame { get; set; } = BarTimeFrame.Hour;
+    public override DateTime FromDate { get; set; } = new DateTime(2020, 01, 01);
+    public override DateTime ToDate { get; set; } = new DateTime(2023, 01, 01);
+    public override BarTimeFrame TimeFrame { get; set; } = BarTimeFrame.Hour;
 
-    public async Task InitStrategy(string symbol, IAlpacaCryptoDataClient dataClient)
+    public override async Task InitStrategy(string symbol, IAlpacaCryptoDataClient dataClient)
     {
         var from = FromDate.AddMonths(-1);
 
@@ -49,7 +49,8 @@ public class FallingCrossMA : IBacktestRunner
         }
     }
 
-    public string ExtraDetails()
+    
+    public override string ExtraDetails()
     {
         return $"""
                 hit stop loss: {SL}
@@ -58,7 +59,7 @@ public class FallingCrossMA : IBacktestRunner
                 """;
     }
 
-    public void OnTick(BacktestState state)
+    public override void OnTick(BacktestState state)
     {
         var candle = state.GetCurrentCandle();
         _tickerData.Add(candle.CandleToTicker());
