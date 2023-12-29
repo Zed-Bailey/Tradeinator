@@ -34,6 +34,14 @@ Provides a simple example of registering to an topic and consuming data
 ## Tradeinator.Backtester
 Provides a framework for quickly backtesting strategies using the `SimpleBackTestLib` library
 
+Strategies inherit from the BacktestRunner abstract class and must have the BacktestStrategyMetadata attribute added for it to be discoverable.
+The meta data attribute defines some properties of the strategy such as it's name and budget.
+
+When running the backtest the assembly is scanned for all classes that have the attribute applied. 
+Options are then displayed allowing you to select which backtest to run (see image below)
+<img src="docs/images/backtest_runner_example.png" title="an example of the options displayed to the user"/>
+
+Spectre.Console is used to pretty print options to the console
 
 
 ## Tradeinator.EventTester
