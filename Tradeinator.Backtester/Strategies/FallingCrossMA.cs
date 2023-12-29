@@ -8,6 +8,7 @@ using Tradeinator.Backtester.Helpers;
 
 namespace Tradeinator.Backtester.Strategies;
 
+[BackTestStrategyMetadata("Falling cross strategy")]
 public class FallingCrossMA : IBacktestRunner
 {
     private List<TickerData> _tickerData = new();

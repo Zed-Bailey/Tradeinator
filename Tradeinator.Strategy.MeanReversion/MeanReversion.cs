@@ -6,7 +6,7 @@ using Tradeinator.Strategy.Shared;
 
 namespace Tradeinator.Strategy.MeanReversion;
 
-public class MeanReversion : Shared.Strategy
+public class MeanReversion : StrategyBase
 {
     private List<decimal> _closingPrices = new();
     
@@ -19,10 +19,7 @@ public class MeanReversion : Shared.Strategy
         _tradeManager = manager;
         _alpacaCryptoDataClient = Environments.Paper.GetAlpacaCryptoDataClient(new SecretKey(key, secret));
     }
-
-    public MeanReversion()
-    {
-    }
+    
 
 
     public override async Task Init()
@@ -51,6 +48,11 @@ public class MeanReversion : Shared.Strategy
         _closingPrices.RemoveAt(0);
         var avg = _closingPrices.Average();
         var diff = avg - bar.Close;
+        
+    }
+
+    public override void Dispose()
+    {
         
     }
 }
