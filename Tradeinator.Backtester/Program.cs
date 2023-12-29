@@ -1,24 +1,23 @@
 ﻿using System.Diagnostics;
-using System.Globalization;
 using System.Reflection;
-using System.Text;
 using Alpaca.Markets;
-using CsvHelper;
 using Microsoft.Extensions.Configuration;
-using Serilog;
-using Serilog.Core;
 using SimpleBacktestLib;
+using Spectre.Console;
 using Tradeinator.Backtester.Helpers;
-using Tradeinator.Backtester.Strategies;
 using Tradeinator.Shared;
 
-
+// default symbol strategies are executed on
 var SYMBOL = "BTC/USD";
 
 if (args.Length > 0)
 {
     SYMBOL = args[0];
 }
+
+// required otherwise the console will be all messed up
+Console.CancelKeyPress += (sender, eventArgs) => AnsiConsole.WriteLine();
+
 
 DotEnv.LoadEnvFiles(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
 
@@ -38,29 +37,24 @@ if (key == null || secret == null)
 }
 
 
-var dataClient = Environments.Paper.GetAlpacaCryptoDataClient(new SecretKey(key, secret));
 
-// IBacktestRunner backtest = new MeanReversionBacktest();
-// IBacktestRunner backtest = new DelayedMovingAverageCrossOver();
-// IBacktestRunner backtest = new MMI();
-// IBacktestRunner backtest = new FallingCrossMA();
-// IBacktestRunner backtest = new HullMA();
-IBacktestRunner backtest = new TrendTrading();
 
-var metadata = GetMetaData(backtest);
-
-if (metadata == null)
+var availableStrategies = GetAvailableStrategies();
+var strategy = GetStrategyToRun(availableStrategies);
+if (strategy == null)
 {
-    throw new ArgumentNullException(nameof(metadata), "BackTestStrategyMetadata attribute was not found on the strategy");
+    AnsiConsole.MarkupLine("[red]Backtest not selected[/]");
+    return;
 }
 
-var candleData = (await GetData(SYMBOL)).ToList();
+AnsiConsole.MarkupLineInterpolated($"Running Backtest for strategy: [lime]{strategy.attribute.StrategyName}[/]");
 
-// fetch meta data from the backtest metadata attribute
+var backtest = strategy.backtestRunner;
 
 
+var dataClient = Environments.Paper.GetAlpacaCryptoDataClient(new SecretKey(key, secret));
+var candleData = (await DataFetcher.GetData(SYMBOL, Directory.GetCurrentDirectory(), backtest.FromDate, backtest.ToDate, backtest.TimeFrame, dataClient)).ToList();
 
-Console.WriteLine($"Running strategy: {metadata.StrategyName}");
 
 
 
@@ -71,9 +65,8 @@ await backtest.InitStrategy(SYMBOL, dataClient);
 
 //
 //
-//
 var builder = BacktestBuilder.CreateBuilder(candleData)
-    .WithQuoteBudget((decimal) metadata.StartingBalance)
+    .WithQuoteBudget((decimal) strategy.attribute.StartingBalance)
     .AddSpotFee(AmountType.Percentage, 0.15m, FeeSource.Base)
     .AddSpotFee(AmountType.Percentage, 0.15m, FeeSource.Quote)
     .OnTick(state =>
@@ -89,114 +82,54 @@ stopwatch.Start();
 var results = await builder.RunAsync();
 stopwatch.Stop();
 
-// logger.Information("Completed backtest in {Time:00}ms", stopwatch.ElapsedMilliseconds);
 Console.WriteLine($"Completed backtest in {stopwatch.ElapsedMilliseconds:00}ms");
-DisplayBacktestResults(results);
+results.PrettyPrintResults(SYMBOL, backtest.ExtraDetails());
+return;
 
 
-BackTestStrategyMetadata? GetMetaData(IBacktestRunner b)
+// gets all types from the assembly with the backtest meta data attribute
+List<AvailableStrategy> GetAvailableStrategies()
 {
-    return (BackTestStrategyMetadata?) Attribute.GetCustomAttribute(b.GetType(), typeof(BackTestStrategyMetadata));
-}
+    var list = new List<AvailableStrategy>();
 
-async Task<IEnumerable<BacktestCandle>> GetData(string symbol)
-{
-    var dataPath = Path.Combine(Directory.GetCurrentDirectory(), $"{symbol.Replace("/", "_")}.csv");
-    List<BacktestCandle> candleData;
-    if (File.Exists(dataPath))
+    // get all types in te current running assembly
+    var types = Assembly.GetExecutingAssembly().GetTypes();
+
+    foreach (var type in types)
     {
-        Console.WriteLine("existing data path found, loading from csv file");
-        using (var reader = new StreamReader(dataPath))
-        using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+        // get the attribute
+        var attrib = (BackTestStrategyMetadata?) Attribute.GetCustomAttribute(type, typeof(BackTestStrategyMetadata));
+        // check that the type can be assigned to the abstract class
+        var assignable = type.IsAssignableTo(typeof(IBacktestRunner));
+        if (attrib != null && assignable)
         {
-            candleData = csv.GetRecords<BacktestCandle>().ToList();
-        }
-    }
-    else
-    {
-        Console.WriteLine("No existing data path found, loading from api");
-        candleData = (await FetchDataFromAlpaca(symbol, backtest.FromDate, backtest.ToDate, backtest.TimeFrame)).ToList();
-        Console.WriteLine("Writing data to csv file");
-        using (var writer = new StreamWriter(dataPath))
-        using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
-        {
-            csv.WriteRecords(candleData);
-        }
-    }
 
-    return candleData;
-}
-
-// load data
-async Task<IEnumerable<BacktestCandle>> FetchDataFromAlpaca(string symbol, DateTime from, DateTime to, BarTimeFrame timeFrame)
-{
-    var page = await dataClient.ListHistoricalBarsAsync(
-        new HistoricalCryptoBarsRequest(symbol, from, to, timeFrame));
-
-    var bars = new List<IBar>(page.Items);
-    var paginationToken = page.NextPageToken;
-    while (paginationToken != null)
-    {
-        Console.WriteLine($"Getting next page of data. token={paginationToken}");
-        var request = new HistoricalCryptoBarsRequest(symbol, from, to, timeFrame)
-        {
-            Pagination =
+            IBacktestRunner? b = (IBacktestRunner?) Activator.CreateInstance(type);
+            if (b != null)
             {
-                Token = paginationToken
+                list.Add(new AvailableStrategy(b, attrib));
             }
-        };
-        page = await dataClient.ListHistoricalBarsAsync(request);
-        paginationToken = page.NextPageToken;
-        bars.AddRange(page.Items);
+            else
+            {
+                Console.WriteLine($"Failed to get strategy implementation for: {attrib.StrategyName}");
+            }
+        }
     }
 
-    return bars.Select(x => new BacktestCandle
-    {
-        Open = x.Open,
-        High = x.High,
-        Low = x.Low,
-        Close = x.Close,
-        Time = x.TimeUtc,
-        Volume = x.Volume
-    });
+    return list;
 }
 
-// prints the back test results
-// copied from demo: https://github.com/NotCoffee418/SimpleBacktestLib/blob/main/SimpleBacktestLib.Demo/Program.cs
-void DisplayBacktestResults(BacktestResult r)
+AvailableStrategy? GetStrategyToRun(List<AvailableStrategy> strategies)
 {
-    // Formatting
-    StringBuilder sb = new(Environment.NewLine);
-    sb.AppendLine($"Backtest Results for {SYMBOL}:");
-    sb.AppendLine();
-    Action<string, string> addLn = (string label, string value) =>
-        sb.AppendLine((label + ':').PadRight(30) + value);
-
-    // Add data we want
-    addLn("Days Evaluated", r.EvaluatedCandleTimespan().TotalDays.ToString());
-    addLn("First candle", r.FirstCandleTime.ToString());
-    addLn("Last candle", r.LastCandleTime.ToString());
-    sb.AppendLine();
-    addLn("Trade Count", r.SpotTrades.Count.ToString());
-    sb.AppendLine();
-    addLn("P/L $", r.TotalProfitInQuote.ToString());
-    addLn("Profit Strategy", $"{Math.Round(r.ProfitRatio * 100, 2)}%");
-    addLn("Profit Buy & Hold", $"{Math.Round(r.BuyAndHoldProfitRatio * 100, 2)}%");
-    sb.AppendLine();
-    sb.AppendLine();
-    addLn("starting base balance", r.StartingBaseBudget.ToString());
-    addLn("starting quote balance", r.StartingQuoteBudget.ToString());
-    sb.AppendLine();
-    addLn("Final Balance Base", r.FinalBaseBudget.ToString());
-    addLn("Final Balance Quote", r.FinalQuoteBudget.ToString());
+    AnsiConsole.Write("");
+    // display selection prompt
+    var backtestSelected = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+            .Title("Select a strategy to run")
+            .PageSize(10)
+            .MoreChoicesText("[grey](Move up and down to reveal more strategies)[/]")
+            .AddChoices(strategies.Select(x => x.attribute.StrategyName))
+    );
     
-    sb.AppendLine();
-    
-    addLn("Number of spot trades", r.SpotTrades.Count.ToString());
-    addLn("Number of margin trades", r.MarginTrades.Count.ToString());
-
-    sb.AppendLine();
-    sb.AppendLine(backtest.ExtraDetails());
-    // Print it
-    Console.WriteLine(sb.ToString());
+    return  availableStrategies.FirstOrDefault(x => x.attribute.StrategyName == backtestSelected);
 }
