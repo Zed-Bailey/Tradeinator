@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Globalization;
+using System.Reflection;
 using System.Text;
 using Alpaca.Markets;
 using CsvHelper;
@@ -43,38 +44,23 @@ var dataClient = Environments.Paper.GetAlpacaCryptoDataClient(new SecretKey(key,
 // IBacktestRunner backtest = new DelayedMovingAverageCrossOver();
 // IBacktestRunner backtest = new MMI();
 // IBacktestRunner backtest = new FallingCrossMA();
-IBacktestRunner backtest = new HullMA();
+// IBacktestRunner backtest = new HullMA();
+IBacktestRunner backtest = new TrendTrading();
 
-// Create serilog logger with console and file sinks
-// await using var logger = new LoggerConfiguration()
-//     .WriteTo.Console()
-//     .WriteTo.File(nameof(backtest) + ".log")
-//     .CreateLogger();
+var metadata = GetMetaData(backtest);
 
-var dataPath = Path.Combine(Directory.GetCurrentDirectory(), $"{SYMBOL.Replace("/", "_")}.csv");
-List<BacktestCandle> candleData;
-if (File.Exists(dataPath))
+if (metadata == null)
 {
-    Console.WriteLine("existing data path found, loading from csv file");
-    using (var reader = new StreamReader(dataPath))
-    using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
-    {
-        candleData = csv.GetRecords<BacktestCandle>().ToList();
-    }
-}
-else
-{
-    Console.WriteLine("No existing data path found, loading from api");
-    candleData = (await GetData(SYMBOL, backtest.FromDate, backtest.ToDate, backtest.TimeFrame)).ToList();
-    Console.WriteLine("Writing data to csv file");
-    using (var writer = new StreamWriter(dataPath))
-    using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
-    {
-        csv.WriteRecords(candleData);
-    }
+    throw new ArgumentNullException(nameof(metadata), "BackTestStrategyMetadata attribute was not found on the strategy");
 }
 
+var candleData = (await GetData(SYMBOL)).ToList();
 
+// fetch meta data from the backtest metadata attribute
+
+
+
+Console.WriteLine($"Running strategy: {metadata.StrategyName}");
 
 
 
@@ -82,11 +68,12 @@ else
 // this could do things like preload past data
 await backtest.InitStrategy(SYMBOL, dataClient);
 
+
 //
 //
 //
 var builder = BacktestBuilder.CreateBuilder(candleData)
-    // .WithQuoteBudget(50000)
+    .WithQuoteBudget((decimal) metadata.StartingBalance)
     .AddSpotFee(AmountType.Percentage, 0.15m, FeeSource.Base)
     .AddSpotFee(AmountType.Percentage, 0.15m, FeeSource.Quote)
     .OnTick(state =>
@@ -107,8 +94,41 @@ Console.WriteLine($"Completed backtest in {stopwatch.ElapsedMilliseconds:00}ms")
 DisplayBacktestResults(results);
 
 
+BackTestStrategyMetadata? GetMetaData(IBacktestRunner b)
+{
+    return (BackTestStrategyMetadata?) Attribute.GetCustomAttribute(b.GetType(), typeof(BackTestStrategyMetadata));
+}
+
+async Task<IEnumerable<BacktestCandle>> GetData(string symbol)
+{
+    var dataPath = Path.Combine(Directory.GetCurrentDirectory(), $"{symbol.Replace("/", "_")}.csv");
+    List<BacktestCandle> candleData;
+    if (File.Exists(dataPath))
+    {
+        Console.WriteLine("existing data path found, loading from csv file");
+        using (var reader = new StreamReader(dataPath))
+        using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+        {
+            candleData = csv.GetRecords<BacktestCandle>().ToList();
+        }
+    }
+    else
+    {
+        Console.WriteLine("No existing data path found, loading from api");
+        candleData = (await FetchDataFromAlpaca(symbol, backtest.FromDate, backtest.ToDate, backtest.TimeFrame)).ToList();
+        Console.WriteLine("Writing data to csv file");
+        using (var writer = new StreamWriter(dataPath))
+        using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+        {
+            csv.WriteRecords(candleData);
+        }
+    }
+
+    return candleData;
+}
+
 // load data
-async Task<IEnumerable<BacktestCandle>> GetData(string symbol, DateTime from, DateTime to, BarTimeFrame timeFrame)
+async Task<IEnumerable<BacktestCandle>> FetchDataFromAlpaca(string symbol, DateTime from, DateTime to, BarTimeFrame timeFrame)
 {
     var page = await dataClient.ListHistoricalBarsAsync(
         new HistoricalCryptoBarsRequest(symbol, from, to, timeFrame));

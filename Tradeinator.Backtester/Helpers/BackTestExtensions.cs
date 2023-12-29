@@ -1,7 +1,7 @@
 using OoplesFinance.StockIndicators.Models;
 using SimpleBacktestLib;
 
-namespace Tradeinator.Backtester;
+namespace Tradeinator.Backtester.Helpers;
 
 public static class BackTestExtensions
 {
