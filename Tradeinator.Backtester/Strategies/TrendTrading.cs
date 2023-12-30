@@ -9,11 +9,10 @@ using Tradeinator.Backtester.Helpers;
 namespace Tradeinator.Backtester.Strategies;
 
 [BackTestStrategyMetadata("Trend Trading")]
-public class TrendTrading : IBacktestRunner
+public class TrendTrading : BacktestRunner
 {
-    public override DateTime FromDate { get; set; }
-    public override DateTime ToDate { get; set; }
-    public override BarTimeFrame TimeFrame { get; set; }
+    
+    
 
     private List<TickerData> _tickerData = new();
 

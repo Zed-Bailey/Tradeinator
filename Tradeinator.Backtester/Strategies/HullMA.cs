@@ -9,7 +9,7 @@ using Tradeinator.Backtester.Helpers;
 namespace Tradeinator.Backtester.Strategies;
 
 [BackTestStrategyMetadata("Hull Moving Average")]
-public class HullMA : IBacktestRunner
+public class HullMA : BacktestRunner
 {
     private List<TickerData> _tickerData = new();
     

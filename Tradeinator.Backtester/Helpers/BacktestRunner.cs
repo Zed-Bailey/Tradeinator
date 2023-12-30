@@ -3,11 +3,12 @@ using SimpleBacktestLib;
 
 namespace Tradeinator.Backtester.Helpers;
 
-public abstract class IBacktestRunner
+public abstract class BacktestRunner
 {
-    public abstract DateTime FromDate { get; set; }
-    public abstract DateTime ToDate { get; set; }
-    public abstract BarTimeFrame TimeFrame { get; set; } 
+    
+    public virtual DateTime FromDate { get; set; } = new DateTime(2020, 01, 01);
+    public virtual DateTime ToDate { get; set; } = new DateTime(2023, 01, 01);
+    public virtual BarTimeFrame TimeFrame { get; set; } = BarTimeFrame.Hour;
         
     public abstract Task InitStrategy(string symbol, IAlpacaCryptoDataClient dataClient);
     public abstract void OnTick(BacktestState state);

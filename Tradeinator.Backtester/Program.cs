@@ -18,6 +18,7 @@ if (args.Length > 0)
 // required otherwise the console will be all messed up
 Console.CancelKeyPress += (sender, eventArgs) => AnsiConsole.WriteLine();
 
+var stopwatch = new Stopwatch();
 
 DotEnv.LoadEnvFiles(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
 
@@ -36,7 +37,8 @@ if (key == null || secret == null)
     throw new ArgumentNullException(key ?? secret);
 }
 
-
+// clear console so it's nice and clean
+AnsiConsole.Clear();
 
 
 var availableStrategies = GetAvailableStrategies();
@@ -53,9 +55,11 @@ var backtest = strategy.backtestRunner;
 
 
 var dataClient = Environments.Paper.GetAlpacaCryptoDataClient(new SecretKey(key, secret));
+
+stopwatch.Start();
 var candleData = (await DataFetcher.GetData(SYMBOL, Directory.GetCurrentDirectory(), backtest.FromDate, backtest.ToDate, backtest.TimeFrame, dataClient)).ToList();
-
-
+stopwatch.Stop();
+Console.WriteLine($"Loaded data in {stopwatch.ElapsedMilliseconds:F2}ms");
 
 
 // initialise the strategy
@@ -77,8 +81,7 @@ var builder = BacktestBuilder.CreateBuilder(candleData)
     
     
 
-var stopwatch = new Stopwatch();
-stopwatch.Start();
+stopwatch.Restart();
 var results = await builder.RunAsync();
 stopwatch.Stop();
 
@@ -100,11 +103,11 @@ List<AvailableStrategy> GetAvailableStrategies()
         // get the attribute
         var attrib = (BackTestStrategyMetadata?) Attribute.GetCustomAttribute(type, typeof(BackTestStrategyMetadata));
         // check that the type can be assigned to the abstract class
-        var assignable = type.IsAssignableTo(typeof(IBacktestRunner));
+        var assignable = type.IsAssignableTo(typeof(BacktestRunner));
         if (attrib != null && assignable)
         {
 
-            IBacktestRunner? b = (IBacktestRunner?) Activator.CreateInstance(type);
+            BacktestRunner? b = (BacktestRunner?) Activator.CreateInstance(type);
             if (b != null)
             {
                 list.Add(new AvailableStrategy(b, attrib));

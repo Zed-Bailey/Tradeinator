@@ -8,7 +8,7 @@ using Tradeinator.Backtester.Helpers;
 namespace Tradeinator.Backtester.Strategies;
 
 [BackTestStrategyMetadata("Delayed Moving average crossover")]
-public class DelayedMovingAverageCrossOver : IBacktestRunner
+public class DelayedMovingAverageCrossOver : BacktestRunner
 {
     private DateTime? _nextTradeTime;
     private List<TickerData> _tickerData = new();
