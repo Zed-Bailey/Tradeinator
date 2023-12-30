@@ -59,7 +59,13 @@ var dataClient = Environments.Paper.GetAlpacaCryptoDataClient(new SecretKey(key,
 stopwatch.Start();
 var candleData = (await DataFetcher.GetData(SYMBOL, Directory.GetCurrentDirectory(), backtest.FromDate, backtest.ToDate, backtest.TimeFrame, dataClient)).ToList();
 stopwatch.Stop();
-Console.WriteLine($"Loaded data in {stopwatch.ElapsedMilliseconds:F2}ms");
+if (candleData.Count == 0)
+{
+    AnsiConsole.MarkupLine("[red]Failed to load data[/]");
+    return;
+}
+
+AnsiConsole.MarkupLineInterpolated($"[green]Loaded data in {stopwatch.ElapsedMilliseconds:F2}ms[/]");
 
 
 // initialise the strategy
