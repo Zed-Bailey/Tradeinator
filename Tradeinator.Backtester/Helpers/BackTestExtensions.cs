@@ -51,6 +51,7 @@ public static class BackTestExtensions
         addLn("Last candle", r.LastCandleTime.ToString());
         sb.AppendLine();
         addLn("Trade Count", r.SpotTrades.Count.ToString());
+        addLn("Trades per day", $"{r.SpotTrades.Count / r.EvaluatedCandleTimespan().TotalDays:F}");
         sb.AppendLine();
         addLn("P/L $", r.TotalProfitInQuote.ToString());
         addLn("Profit Strategy", $"{Math.Round(r.ProfitRatio * 100, 2)}%");

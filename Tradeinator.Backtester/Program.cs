@@ -79,13 +79,14 @@ var builder = BacktestBuilder.CreateBuilder(candleData)
     .WithQuoteBudget((decimal) strategy.attribute.StartingBalance)
     .AddSpotFee(AmountType.Percentage, 0.15m, FeeSource.Base)
     .AddSpotFee(AmountType.Percentage, 0.15m, FeeSource.Quote)
+    .EvaluateBetween(backtest.FromDate, backtest.ToDate)
     .OnTick(state =>
     {
         backtest.OnTick(state);
     })
     .OnLogEntry((entry, _) => Console.WriteLine(entry));
     
-    
+
 
 stopwatch.Restart();
 var results = await builder.RunAsync();
