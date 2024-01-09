@@ -6,6 +6,11 @@ namespace Tradeinator.Backtester.Helpers;
 
 public static class BackTestExtensions
 {
+    /// <summary>
+    /// Converts a BackTestCandle to a TickerData object used by the indicators library
+    /// </summary>
+    /// <param name="c">candle</param>
+    /// <returns>converted ticker data object</returns>
     public static TickerData CandleToTicker(this BacktestCandle c)
     {
         return new TickerData
@@ -63,15 +68,46 @@ public static class BackTestExtensions
         sb.AppendLine();
         addLn("Final Balance Base", r.FinalBaseBudget.ToString());
         addLn("Final Balance Quote", r.FinalQuoteBudget.ToString());
-
         sb.AppendLine();
-
         addLn("Number of spot trades", r.SpotTrades.Count.ToString());
         addLn("Number of margin trades", r.MarginTrades.Count.ToString());
 
+        addLn("% profitable trades", CalculatePctProfitable(r.SpotTrades.ToList()).ToString());
+        
         sb.AppendLine();
         sb.AppendLine(extraDetails);
+        
         // Print it
         Console.WriteLine(sb.ToString());
+    }
+
+    /// <summary>
+    /// calculates the win loss ratio of the trades the system made
+    /// assumes that their is no pyramiding (only 1 trade is open at a time)
+    /// </summary>
+    /// <param name="trades"></param>
+    /// <returns></returns>
+    private static double CalculatePctProfitable(List<BacktestTrade> trades)
+    {
+
+        double wins = 0;
+        double closed = 0;
+        
+        if (trades.Count == 0) return 0;
+        
+        for (int i = 1; i < trades.Count; i++)
+        {
+            var trade = trades[i];
+            if (trade.Action == TradeOperation.Sell)
+            {
+                var previous = trades[i - 1];
+                // check we made a profit on the sell price - buy price
+                if (trade.QuotePrice - previous.QuotePrice > 0)
+                    wins++;
+                closed++;
+            }
+        }
+
+        return (wins / closed)*100;
     }
 }
