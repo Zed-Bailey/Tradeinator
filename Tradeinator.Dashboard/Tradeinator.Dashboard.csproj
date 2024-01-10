@@ -1,9 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.3.0" />
+      <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.3.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Tradeinator.DataIngestion.Shared\Tradeinator.DataIngestion.Shared.csproj" />
+    </ItemGroup>
 
 </Project>

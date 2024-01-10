@@ -1,19 +1,34 @@
-﻿@inherits LayoutComponentBase
+﻿@using Microsoft.FluentUI.AspNetCore.Components
+@inherits LayoutComponentBase
 
-<PageTitle>Tradeinator.Dashboard</PageTitle>
+<PageTitle>Tradeinator - Dashboard</PageTitle>
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu/>
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
+<FluentLayout>
+    <FluentHeader>
+        Tradeinator Dashboard
+    </FluentHeader>
+    <FluentStack Orientation="Orientation.Horizontal">
+        
+        <FluentNavMenu Width="250">
+            <FluentNavLink Icon="@(new Icons.Regular.Size24.Home())" Href="/" Match="NavLinkMatch.All">Home</FluentNavLink>
+            <FluentNavLink Icon="@(new Icons.Regular.Size24.Calendar())" Href="events">Events</FluentNavLink>
+            
+            <FluentNavGroup Title="Item 3">
+                <FluentNavLink Icon="@(new Icons.Regular.Size24.LeafOne())">Item 3.1</FluentNavLink>
+                <FluentNavLink Icon="@(new Icons.Regular.Size24.LeafTwo())">Item 3.2</FluentNavLink>
+            </FluentNavGroup>
+            
+        </FluentNavMenu>
+        
+        <FluentBodyContent>
             @Body
-        </article>
-    </main>
-</div>
+            
+            <FluentToastProvider />
+            <FluentDialogProvider />
+            <FluentTooltipProvider />
+            <FluentMessageBarProvider />
+        </FluentBodyContent>
+        
+    </FluentStack>
+    
+</FluentLayout>
