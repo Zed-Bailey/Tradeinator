@@ -4,9 +4,39 @@
 
 <PageTitle>Index</PageTitle>
 
+<FluentLabel Typo="Typography.H1">Dashboard</FluentLabel>
+
+<FluentGrid Justify="JustifyContent.FlexStart" Spacing="2">
+    <FluentGridItem xs="12">
+        <FluentCard>
+            Hello
+        </FluentCard>
+    </FluentGridItem>
+    
+    <FluentGridItem xs="12" sm="6">
+        <FluentCard>
+            <div class="d-flex">
+                <span class="d-inline-flex">
+                    <FluentLabel Weight="FontWeight.Bold" Typo="Typography.H2" Class="me-0 pe-0 mt-auto">$1,234</FluentLabel>
+                    <FluentLabel Class="ms-0 ps-0 mt-auto" Typo="Typography.H4">.89</FluentLabel>
+                </span>
+                
+                <div class="rounded-pill bg-success text-white p-1" style="height: fit-content;">
+                    <FluentIcon Value="@(new Icons.Regular.Size20.ChevronUp())" Color="Color.Custom" CustomColor="#ffffff"/>
+                    1.8%
+                </div>
+                
+            </div>
+            
 
 
-<FluentCard>
-    <h2>Hello World!</h2>
-    <FluentButton Appearance="@Appearance.Accent">Click Me</FluentButton>
-</FluentCard>
+        </FluentCard>
+    </FluentGridItem>
+    
+    <FluentGridItem xs="12" sm="6">
+        <FluentCard>
+            hello
+        </FluentCard>
+    </FluentGridItem>
+    
+</FluentGrid>

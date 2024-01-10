@@ -15,6 +15,14 @@
     <p>@eventService.Host</p>
 </div>
 
+@if (!eventService.Connected)
+{
+    <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" HorizontalAlignment="HorizontalAlignment.Center">
+        <FluentIcon Value="@(new Icons.Regular.Size48.ErrorCircle())" Color="@Color.Error"/>
+        <h2 class="text-danger my-auto">Not connected to RabbitMQ exchange</h2>
+    </FluentStack>
+}
+    
 
 <FluentDataGrid Items="@FilteredItems" ItemKey="@(p => p.Key)" Pagination="@pagination">
     
