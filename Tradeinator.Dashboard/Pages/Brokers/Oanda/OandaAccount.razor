@@ -1,0 +1,83 @@
+@page "/broker/oanda"
+@using GeriRemenyi.Oanda.V20.Client.Client
+@using GeriRemenyi.Oanda.V20.Client.Model
+@using GeriRemenyi.Oanda.V20.Sdk
+@using GeriRemenyi.Oanda.V20.Sdk.Common.Types
+@using Microsoft.FluentUI.AspNetCore.Components
+
+@inject IConfiguration Config
+@inject IDialogService dialogService
+
+<h3>Oanda account overview</h3>
+
+@if (isLoading && !isError)
+{
+    <FluentProgressRing Value="null"/>
+}
+
+@if (isError)
+{
+    <p>Error</p>
+}
+
+@if (!isLoading)
+{ 
+    <FluentButton IconStart="@(new Icons.Filled.Size24.ArrowDownload())" Appearance="Appearance.Stealth">Refresh Accounts</FluentButton>
+    
+ 
+    <FluentGrid Class="mt-3">
+        @foreach (var a in accountSummaries)
+        {
+            var acc = a.Account;
+            
+            <FluentGridItem sm="12" md="6" xl="3">
+                <FluentCard >
+                    <FluentLabel Typo="Typography.H3">@acc.Alias</FluentLabel>
+                    <FluentLabel Typo="Typography.Subject" Class="fw-light">@acc.Id</FluentLabel>
+                    <FluentLabel Typo="Typography.H4" Weight="FontWeight.Bold">$ @acc.Balance</FluentLabel>
+
+                    <FluentAnchor Appearance="Appearance.Lightweight" Href="@($"/broker/oanda/{acc.Id}")" Class="w-100" IconEnd="@(new Icons.Filled.Size16.ArrowRight())">
+                        View Account
+                    </FluentAnchor>
+                </FluentCard>
+                
+            </FluentGridItem>
+        }
+    </FluentGrid>
+}
+
+
+@code {
+    bool isError = false;
+    bool isLoading = true;
+    IOandaApiConnection? connection;
+
+    IEnumerable<AccountProperties> currentAccounts = new List<AccountProperties>();
+    List<AccountSummaryResponse> accountSummaries = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var token = Config["OANDA_API_TOKEN"];
+        if (string.IsNullOrEmpty(token))
+        {
+            await dialogService.ShowErrorAsync("Oanda api token was not found in configuration", "Token Error");
+            isError = true;
+        }
+        
+        var server = OandaConnectionType.FxPractice;
+        connection = new OandaApiConnectionFactory().CreateConnection(server, token);
+
+        currentAccounts = connection.GetAccounts();
+
+        foreach (var id in currentAccounts)
+        {
+            var summary = await connection.AccountApi.GetAccountSummaryAsync(id.Id);
+            accountSummaries.Add(summary);
+        }
+        
+        //
+        isLoading = false;
+        await base.OnInitializedAsync();
+    }
+
+}

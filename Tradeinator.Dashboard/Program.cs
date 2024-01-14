@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.FluentUI.AspNetCore.Components;
 using Tradeinator.Dashboard.Data;
+using Tradeinator.Shared;
+
+DotEnv.LoadEnvFiles(Path.Join(Directory.GetCurrentDirectory(), ".env"));
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +22,6 @@ await exchange.StartConsuming();
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddSingleton<EventService>(exchange);
 
 // register default http client, required for fluent ui

@@ -55,12 +55,12 @@ public class EventService
     {
         var ee = new ExchangeEvent(e.RoutingKey, e.BodyAsString(), DateTime.Now, Guid.NewGuid().ToString());
         _events.Add(ee);
-        // have max 100 previous events in the queue
+        // have max 100 previous events in the window
         if (_events.Count > 100)
         {
             _events.RemoveAt(0);
         }
         
-        NewDataReceived?.Invoke(this, new NewExchangeEventArgs(ee));
+        NewDataReceived?.Invoke(this, EventArgs.Empty);
     }
 }

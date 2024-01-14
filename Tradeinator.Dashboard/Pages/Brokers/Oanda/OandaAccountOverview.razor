@@ -1,0 +1,54 @@
+@page "/broker/oanda/{AccountId}"
+@using GeriRemenyi.Oanda.V20.Sdk
+@using GeriRemenyi.Oanda.V20.Sdk.Common.Types
+@using GeriRemenyi.Oanda.V20.Client.Model
+@using Microsoft.FluentUI.AspNetCore.Components
+@inject IConfiguration Config
+
+<h3>Account Overview</h3>
+
+@if (isError)
+{
+    <p>Error loading account information</p>
+}
+
+@if (isLoading)
+{
+    <FluentProgressRing Value="null"/>
+}
+
+
+
+
+@code {
+    [Parameter] public string AccountId { get; set; }
+    bool isError = false;
+    bool isLoading = true;
+
+    bool tradesLoading = true;
+    
+    IOandaApiConnection? connection;
+    AccountSummaryResponse? accountSummary;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var token = Config["OANDA_API_TOKEN"];
+       
+        var server = OandaConnectionType.FxPractice;
+        connection = new OandaApiConnectionFactory().CreateConnection(server, token);
+        
+        accountSummary = await connection.AccountApi.GetAccountSummaryAsync(AccountId);
+
+        LoadTrades();
+        //
+        isLoading = false;
+        await base.OnInitializedAsync();
+    }
+
+    async void LoadTrades()
+    {
+        // var res = await connection.TransactionApi.GetTransactionsAsync(AccountId);
+        
+    }
+    
+}
