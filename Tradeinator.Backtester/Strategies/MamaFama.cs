@@ -91,7 +91,7 @@ public class MamaFama : BacktestRunner
         // mama has crossed from below
         if (mamaPrev < famaPrev && mama > fama && !_tradeOpen)
         {
-            tradeId = state.Trade.Margin.Long(AmountType.Absolute, state.QuoteBalance * 0.25m);
+            tradeId = state.Trade.Margin.Long(AmountType.Absolute, state.QuoteBalance);
             _tradeOpen = true;
             var openPrice = state.GetAllMarginTrades()[tradeId].OpenPrice;
             sl = openPrice - atr * 2.5m;
