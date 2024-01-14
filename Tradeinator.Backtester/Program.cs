@@ -77,6 +77,10 @@ await backtest.InitStrategy(SYMBOL, dataClient);
 //
 var builder = BacktestBuilder.CreateBuilder(candleData)
     .WithQuoteBudget((decimal) strategy.attribute.StartingBalance)
+    
+    .WithMarginLeverageRatio(30)
+    .WithDefaultMarginLongOrderSize(AmountType.Percentage, 5)
+    
     .AddSpotFee(AmountType.Percentage, 0.15m, FeeSource.Base)
     .AddSpotFee(AmountType.Percentage, 0.15m, FeeSource.Quote)
     .EvaluateBetween(backtest.FromDate, backtest.ToDate)
@@ -92,7 +96,8 @@ stopwatch.Restart();
 var results = await builder.RunAsync();
 stopwatch.Stop();
 
-Console.WriteLine($"Completed backtest in {stopwatch.ElapsedMilliseconds:00}ms");
+AnsiConsole.MarkupLineInterpolated($"[green]Completed backtest in {stopwatch.ElapsedMilliseconds:00}ms [/]");
+
 results.PrettyPrintResults(SYMBOL, backtest.ExtraDetails());
 return;
 

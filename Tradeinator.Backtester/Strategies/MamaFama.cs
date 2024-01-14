@@ -8,8 +8,9 @@ using Tradeinator.Backtester.Helpers;
 
 namespace Tradeinator.Backtester.Strategies;
 
-[BackTestStrategyMetadata("Stochastic scalping", StartingBalance = 5000)]
-public class StochasticScalping : BacktestRunner
+
+[BackTestStrategyMetadata("Mama Fama", StartingBalance = 5000)]
+public class MamaFama : BacktestRunner
 {
     // public override DateTime FromDate { get; set; } = new DateTime(2022, 06, 01);
     public override DateTime FromDate { get; set; } = DateTime.Parse("2016-01-06 21:30");
@@ -58,60 +59,63 @@ public class StochasticScalping : BacktestRunner
         {
             if ((decimal)candle.Close <= sl )
             {
-                // state.Trade.Spot.Sell();
                 state.Trade.Margin.ClosePosition(tradeId);
                 _tradeOpen = false;
                 _slHit++;
                 return;
             } 
             
-            if ((decimal) candle.Close >= tp)
-            {
-                state.Trade.Margin.ClosePosition(tradeId);
-                // state.Trade.Spot.Sell();
-                _tradeOpen = false;
-                _tpHit++;
-                return;
-            }
+            // if ((decimal) candle.Close >= tp)
+            // {
+            //     state.Trade.Margin.ClosePosition(tradeId);
+            //     _tradeOpen = false;
+            //     _tpHit++;
+            //     return;
+            // }
         }
         
         var stockData = new StockData(_tickerData);
 
-        var ehlersMotherAMA = stockData.CalculateEhlersMotherOfAdaptiveMovingAverages(fastAlpha: 0.25);
+        var ehlersMotherAMA = stockData.CalculateEhlersMotherOfAdaptiveMovingAverages();
         var fama = ehlersMotherAMA.LatestValue("Fama");
         var mama = ehlersMotherAMA.LatestValue("Mama");
         
-        var emamaLongCondition = mama < fama;
-        var emamaShortCondition = mama > fama;
-
-        
-        
-        stockData.Clear();
-        
-        var stoch = stockData.CalculateStochasticOscillator(MovingAvgType.EhlersKaufmanAdaptiveMovingAverage);
-
-        var k = stoch.OutputValues["FastK"].Last();
-        var d = stoch.OutputValues["FastD"].Last();
+        var famaPrev = ehlersMotherAMA.OutputValues["Fama"][200 - 3];
+        var mamaPrev = ehlersMotherAMA.OutputValues["Mama"][200 - 3];
         
         stockData.Clear();
         var atr = (decimal) stockData.CalculateAverageTrueRange().LatestValue("Atr");
-        
-        var stochLongCondition = (k < 20 && d < 20 && k > d) && emamaLongCondition;
-        var stochShortCondition = (k > 80 && d > 80) || k < d;
 
-        var longCondition = stochLongCondition;
-        var shortCondition = stochShortCondition; 
-        if(longCondition && !_tradeOpen)
+        
+
+        // mama has crossed from below
+        if (mamaPrev < famaPrev && mama > fama && !_tradeOpen)
         {
-            // only risk 2% of equity per trade
-            // state.Trade.Spot.Buy(AmountType.Percentage, 2);
             tradeId = state.Trade.Margin.Long(AmountType.Absolute, state.QuoteBalance * 0.25m);
             _tradeOpen = true;
-            // var last = state.GetLastSpotTrade();
-            var last = state.GetAllMarginTrades()[tradeId].OpenPrice;
-            tp = last + atr*3.5m;
-            sl = last - atr*3.5m;
+            var openPrice = state.GetAllMarginTrades()[tradeId].OpenPrice;
+            sl = openPrice - atr * 2.5m;
+            // tp = openPrice + atr * 2.5m;
         }
+        // mama has crossed under
+        else if (mamaPrev > famaPrev && mama < fama && _tradeOpen)
+        {
+            state.Trade.Margin.ClosePosition(tradeId);
+            _tradeOpen = false;
+        }
+
+
+        // if(longCondition && !_tradeOpen)
+        // {
+        //     // only risk 2% of equity per trade
+        //     // state.Trade.Spot.Buy(AmountType.Percentage, 2);
+        //     tradeId = state.Trade.Margin.Long(AmountType.Absolute, state.QuoteBalance * 0.50m);
+        //     _tradeOpen = true;
+        //     // var last = state.GetLastSpotTrade();
+        //     var last = state.GetAllMarginTrades()[tradeId].OpenPrice;
+        //     tp = last + atr*3.5m;
+        //     sl = last - atr*3.5m;
+        // }
         // else if (_tradeOpen && shortCondition)
         // {
         //     // state.Trade.Spot.Sell();
