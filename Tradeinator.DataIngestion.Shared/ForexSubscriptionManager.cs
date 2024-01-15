@@ -24,7 +24,7 @@ public class ForexSubscriptionManager
         _fileSystemWatcher.Changed += OnSymbolsFileChanged;
         
         // load file
-        OnSymbolsFileChanged(new object(), new FileSystemEventArgs(WatcherChangeTypes.Changed, directoryPath, symbolsFileName));
+        OnSymbolsFileChanged(this, new FileSystemEventArgs(WatcherChangeTypes.Changed, directoryPath, symbolsFileName));
     }
     
     
@@ -63,7 +63,7 @@ public class ForexSubscriptionManager
         foreach (var line in text)
         {
             // trim whitespace and convert to uppercase
-            var symbol = line.Trim().ToUpper().Replace("/", "_");
+            var symbol = line.Trim().ToUpper();
             
             if (_watchedSymbols.Contains(symbol)) continue;
             

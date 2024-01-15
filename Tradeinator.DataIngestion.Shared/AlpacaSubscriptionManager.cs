@@ -115,7 +115,6 @@ public abstract class AlpacaSubscriptionManager : IAsyncDisposable
         
         newSubscription.Received += bar =>
         {
-            Console.WriteLine($"New {bar.Symbol} bar received");
             var msg = new
             {
                 bar.Open,

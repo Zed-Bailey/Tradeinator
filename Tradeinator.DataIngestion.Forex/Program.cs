@@ -1,8 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-
-using GeriRemenyi.Oanda.V20.Client.Model;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Serilog;
 using Tradeinator.DataIngestion.Forex;
 using Tradeinator.DataIngestion.Shared;
@@ -19,15 +15,15 @@ var config = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
-// var host = config["Rabbit:Host"];
-// var exchangeName = config["Rabbit:Exchange"];
-//
-// if (host is null || exchangeName is null)
-// {
-//     throw new ArgumentNullException(host ?? exchangeName);
-// }
+var host = config["Rabbit:Host"];
+var exchangeName = config["Rabbit:Exchange"];
 
-// using var exchange = new PublisherExchange(host, exchangeName);
+if (host is null || exchangeName is null)
+{
+    throw new ArgumentNullException(host ?? exchangeName);
+}
+
+using var exchange = new PublisherExchange(host, exchangeName);
 
 // initialise serilog logger, writing to console and file
 await using var logger = new LoggerConfiguration()
@@ -38,7 +34,7 @@ await using var logger = new LoggerConfiguration()
 
 
 //
-// var subscriptionManager = new ForexSubscriptionManager(logger, Directory.GetCurrentDirectory(), "symbols.txt");
+var subscriptionManager = new ForexSubscriptionManager(logger, Directory.GetCurrentDirectory(), "symbols.txt");
 var tokenSource = new CancellationTokenSource();
 Console.CancelKeyPress += (sender, eventArgs) =>
 {
@@ -61,15 +57,23 @@ return;
 async void TimerTrigger(object? state)
 {
 
-    var bar = await oandaConnection.GetLatestData("AUD_CHF");
-    if (bar is null)
-    {
-        logger.Warning("received bar was null");
+    foreach (var symbol in subscriptionManager.Symbols)
+    { 
+        var bar = await oandaConnection.GetLatestData("AUD_CHF");
+        if (bar is null)
+        {
+            logger.Warning("Received bar for {Symbol} was null", symbol);
+            continue;
+        }
+        
+        // post bar to exchange
+        exchange.Publish(bar, $"bar.{symbol}");
+        logger.Information("Received bar for {Symbol} | {Date} | {O} {H} {L} {C}", 
+            symbol, bar.TimeUtc, bar.Open, bar.High, bar.Low, bar.Close)
+        ;
+        
     }
-    else
-    {
-        logger.Information("{Date} | {O} >> {C}", bar.TimeUtc, bar.Open, bar.Close);
-    }
+   
 }
 
 

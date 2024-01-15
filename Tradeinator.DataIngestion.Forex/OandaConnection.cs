@@ -23,7 +23,9 @@ public class OandaConnection
 
     public async Task<Bar?> GetLatestData(string symbol)
     {
-        if (!Enum.TryParse<InstrumentName>(symbol, out var iName)) return null;
+        // converts AUD/CHF => AUD_CHF which matches enum naming so it can be parsed
+        var cleaned = symbol.Replace("/", "_");
+        if (!Enum.TryParse<InstrumentName>(cleaned, out var iName)) return null;
         
         var candle = await _connection.InstrumentApi.GetInstrumentCandlesAsync(
             iName,
@@ -31,12 +33,9 @@ public class OandaConnection
             smooth: true,
             granularity: CandlestickGranularity.M30,
             from: DateTime.Now.AddHours(-2).ToOandaDateTime(DateTimeFormat.RFC3339)
-            // to: DateTime.Now.ToString()
         );
-        
-        if (candle is null) return null;
 
-        var latest = candle.Candles.Last();
+        var latest = candle?.Candles.Last();
         if (latest is null) return null;
         
         return new Bar()
