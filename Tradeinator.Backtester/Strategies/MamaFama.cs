@@ -12,8 +12,8 @@ namespace Tradeinator.Backtester.Strategies;
 [BackTestStrategyMetadata("Mama Fama", StartingBalance = 5000)]
 public class MamaFama : BacktestRunner
 {
-    public override DateTime FromDate { get; set; } = new DateTime(2023, 01, 01);
-    // public override DateTime ToDate { get; set; } = new DateTime(2023, 06, 01);
+    // public override DateTime FromDate { get; set; } = new DateTime(2019, 01, 01);
+    // public override DateTime ToDate { get; set; } = new DateTime(2020, 01, 01);
     
     // public override DateTime FromDate { get; set; } = DateTime.Parse("2016-01-06 21:30");
     // public override DateTime ToDate { get; set; } = new DateTime(2017, 01, 01);
@@ -115,29 +115,13 @@ public class MamaFama : BacktestRunner
         var atr = (decimal) stockData.CalculateAverageTrueRange().LatestValue("Atr");
 
         stockData.Clear();
-        var rsi = stockData
-            .CalculateRelativeStrengthIndex(signalLength: 2)
-            .CalculateSimpleMovingAverage()
-            .LatestValue("Sma");
+        var rsi = stockData.CalculateEhlersAdaptiveRelativeStrengthIndexV1().LatestValue("Earsi");
+            
         
         // borrow less in a ranging market
         var borrowAmount = isTrending ? 2.0m : 1.25m;
 
-        if (_tradeOpen && _isLong)
-        {
-            if (rsi < 25)
-            {
-                state.AddLogEntry($"rsi sma : {rsi}");
-                state.Trade.Margin.ClosePosition(tradeId);
-                if (fama < mama)
-                {
-                    tradeId = state.Trade.Margin.Long(AmountType.Absolute, state.BaseBalance * borrowAmount);
-                    _tradeOpen = true;
-                    var openPrice = state.GetAllMarginTrades()[tradeId].OpenPrice;
-                    sl = openPrice - atr * 2.5m;
-                }
-            }
-        }
+        var adaptiveTs = (decimal) stockData.CalculateAdaptiveTrailingStop().LatestValue("Ts");
         // mama has crossed from below
         if (mamaPrev < famaPrev && mama > fama)
         {
@@ -146,15 +130,15 @@ public class MamaFama : BacktestRunner
                 state.Trade.Margin.ClosePosition(tradeId);
                 _tradeOpen = false;
             } 
-            else if (!_tradeOpen)
+            if (!_tradeOpen)
             {
                 tradeId = state.Trade.Margin.Long(AmountType.Absolute, state.BaseBalance * borrowAmount);
                 _tradeOpen = true;
-                var openPrice = state.GetAllMarginTrades()[tradeId].OpenPrice;
-                sl = openPrice - atr * 2.5m;
+                
+                sl = adaptiveTs;
             }
             
-            // tp = openPrice + atr * 2.5m;
+            
         }
         // mama has crossed under
         else if (mamaPrev > famaPrev && mama < fama)
@@ -163,15 +147,45 @@ public class MamaFama : BacktestRunner
             {
                 state.Trade.Margin.ClosePosition(tradeId);
                 _tradeOpen = false;
-            } else if (!_tradeOpen)
+            } 
+            if (!_tradeOpen)
             {
                 tradeId = state.Trade.Margin.Short(AmountType.Absolute, state.BaseBalance * borrowAmount);
                 _tradeOpen = true;
                 _isLong = false;
-                var openPrice = state.GetAllMarginTrades()[tradeId].OpenPrice;
-                sl = openPrice + atr * 2.5m;
+                sl = adaptiveTs;
             }
             
+        }
+        else if (_tradeOpen)
+        {
+            // close short position and create new position
+            if (!_isLong && rsi is < 20 and > 0)
+            {
+                state.AddLogEntry($"rsi short buy trigger : {rsi}");
+                state.Trade.Margin.ClosePosition(tradeId);
+                _tradeOpen = false;
+                if (fama < mama)
+                {
+                    tradeId = state.Trade.Margin.Long(AmountType.Absolute, state.BaseBalance * borrowAmount);
+                    _tradeOpen = true;
+                    sl = adaptiveTs;
+                    _isLong = true;
+                }
+            } else if (_isLong && rsi > 90)
+            {
+                state.AddLogEntry($"rsi long sell trigger : {rsi}");
+                state.Trade.Margin.ClosePosition(tradeId);
+                _tradeOpen = false;
+                
+                if (fama > mama)
+                {
+                    tradeId = state.Trade.Margin.Short(AmountType.Absolute, state.BaseBalance * borrowAmount);
+                    _tradeOpen = true;
+                    _isLong = false;
+                    sl = adaptiveTs;
+                }
+            }
         }
         
     }

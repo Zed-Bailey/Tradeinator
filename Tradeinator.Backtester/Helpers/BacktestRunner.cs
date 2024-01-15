@@ -6,7 +6,7 @@ namespace Tradeinator.Backtester.Helpers;
 public abstract class BacktestRunner
 {
     
-    public virtual DateTime FromDate { get; set; } = new DateTime(2020, 01, 01);
+    public virtual DateTime FromDate { get; set; } = DateTime.MinValue;
     public virtual DateTime ToDate { get; set; } = DateTime.Now;
     public virtual BarTimeFrame TimeFrame { get; set; } = BarTimeFrame.Hour;
         

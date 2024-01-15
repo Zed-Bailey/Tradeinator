@@ -72,8 +72,6 @@ public static class BackTestExtensions
         sb.AppendLine();
         addLn("Number of spot trades", r.SpotTrades.Count.ToString());
         addLn("Number of margin trades", r.MarginTrades.Count.ToString());
-
-        addLn("% profitable trades", CalculatePctProfitable(r.SpotTrades.ToList()).ToString());
         
         sb.AppendLine();
         
@@ -96,53 +94,38 @@ public static class BackTestExtensions
 
         var winning = 0.0;
         var loosing = 0.0;
-
+        var avgProfitPerTrade = 0m;
+        var avgNumBarsOpen = 0;
+        
         foreach (var pos in positions)
         {
-            var profit = pos.MarginDirection == TradeType.MarginLong ? pos.QuoteProfit : pos.BaseProfit;
+            var profit = pos.MarginDirection == TradeType.MarginLong ? pos.BaseProfit : pos.QuoteProfit;
                 
-            if (profit > 0.0m) winning++;
+            if (profit > 0.0m)
+            {
+                winning++;
+                avgProfitPerTrade += profit;
+            }
             else loosing++;
+
+            avgNumBarsOpen += pos.CandleCloseIndex - pos.CandleOpenIndex;
         }
-        
-        
-        
-        
+
+
+        avgProfitPerTrade = avgProfitPerTrade / (decimal) winning;
+        // avgNumBarsOpen = avgNumBarsOpen / positions.Count;
         
         return $"""
                win: {winning}
                loose : {loosing}
                win % : {(winning / (winning + loosing))*100:F}
+               
+               avg profit per trade : $ {avgProfitPerTrade:F3}
+               
+               avg num bars trade is open : {avgNumBarsOpen}
+               avg num bars trade is open : {avgNumBarsOpen/positions.Count}
                """;
     }
     
-    /// <summary>
-    /// calculates the win loss ratio of the trades the system made
-    /// assumes that their is no pyramiding (only 1 trade is open at a time)
-    /// </summary>
-    /// <param name="trades"></param>
-    /// <returns></returns>
-    private static double CalculatePctProfitable(List<BacktestTrade> trades)
-    {
-
-        double wins = 0;
-        double closed = 0;
-        
-        if (trades.Count == 0) return 0;
-        
-        for (int i = 1; i < trades.Count; i++)
-        {
-            var trade = trades[i];
-            if (trade.Action == TradeOperation.Sell)
-            {
-                var previous = trades[i - 1];
-                // check we made a profit on the sell price - buy price
-                if (trade.QuotePrice - previous.QuotePrice > 0)
-                    wins++;
-                closed++;
-            }
-        }
-
-        return (wins / closed)*100;
-    }
+ 
 }
