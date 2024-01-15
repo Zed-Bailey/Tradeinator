@@ -12,13 +12,17 @@ namespace Tradeinator.Backtester.Strategies;
 [BackTestStrategyMetadata("Mama Fama", StartingBalance = 5000)]
 public class MamaFama : BacktestRunner
 {
-    // public override DateTime FromDate { get; set; } = new DateTime(2022, 06, 01);
+    // public override DateTime FromDate { get; set; } = new DateTime(2023, 01, 01);
+    // public override DateTime ToDate { get; set; } = new DateTime(2023, 06, 01);
+    
     public override DateTime FromDate { get; set; } = DateTime.Parse("2016-01-06 21:30");
-
+    // public override DateTime ToDate { get; set; } = new DateTime(2017, 01, 01);
+    
     private List<TickerData> _tickerData = new();
 
     private bool _tradeOpen;
-
+    private bool _isLong = false;
+    
     private decimal sl;
     private decimal tp;
 
@@ -41,7 +45,15 @@ public class MamaFama : BacktestRunner
     }
 
     private int tradeId;
-    
+
+    public override void OnFinish(BacktestState state)
+    {
+        if (_tradeOpen)
+        {
+            state.Trade.Margin.ClosePosition(tradeId);
+        }
+    }
+
     public override void OnTick(BacktestState state)
     {
         var candle = state.GetCurrentCandle().CandleToTicker();
@@ -57,26 +69,42 @@ public class MamaFama : BacktestRunner
 
         if (_tradeOpen)
         {
-            if ((decimal)candle.Close <= sl )
+            if(_isLong)
             {
-                state.Trade.Margin.ClosePosition(tradeId);
-                _tradeOpen = false;
-                _slHit++;
-                return;
+                if ((decimal) candle.Close <= sl)
+                {
+                    state.Trade.Margin.ClosePosition(tradeId);
+                    _tradeOpen = false;
+                    _slHit++;
+                    return;
+                }
             } 
-            
-            // if ((decimal) candle.Close >= tp)
-            // {
-            //     state.Trade.Margin.ClosePosition(tradeId);
-            //     _tradeOpen = false;
-            //     _tpHit++;
-            //     return;
-            // }
+            else
+            {
+                if ((decimal) candle.Close >= sl)
+                {
+                    state.Trade.Margin.ClosePosition(tradeId);
+                    _tradeOpen = false;
+                    _slHit++;
+                    return;
+                }
+            }
         }
         
         var stockData = new StockData(_tickerData);
-
-        var ehlersMotherAMA = stockData.CalculateEhlersMotherOfAdaptiveMovingAverages();
+    
+        // var mmi = stockData.CalculateMarketMeannessIndex(MovingAvgType.HullMovingAverage);
+        // var meanness = mmi.LatestValue("Mmi");
+        // var isTrending = meanness < 75;
+        var adx = stockData.CalculateAverageDirectionalIndex().LatestValue("Adx");
+        var isTrending = adx > 25;
+        
+        stockData.Clear();
+        
+        var ehlersMotherAMA = stockData.CalculateEhlersMotherOfAdaptiveMovingAverages(
+            fastAlpha: isTrending ? 0.5 : 0.25,
+            slowAlpha: isTrending ? 0.05 : 0.04
+        );
         var fama = ehlersMotherAMA.LatestValue("Fama");
         var mama = ehlersMotherAMA.LatestValue("Mama");
         
@@ -86,42 +114,65 @@ public class MamaFama : BacktestRunner
         stockData.Clear();
         var atr = (decimal) stockData.CalculateAverageTrueRange().LatestValue("Atr");
 
+        stockData.Clear();
+        var rsi = stockData
+            .CalculateRelativeStrengthIndex(signalLength: 2)
+            .CalculateSimpleMovingAverage()
+            .LatestValue("Sma");
         
+        // borrow less in a ranging market
+        var borrowAmount = isTrending ? 2.0m : 1.25m;
 
-        // mama has crossed from below
-        if (mamaPrev < famaPrev && mama > fama && !_tradeOpen)
+        if (_tradeOpen && _isLong)
         {
-            tradeId = state.Trade.Margin.Long(AmountType.Absolute, state.QuoteBalance);
-            _tradeOpen = true;
-            var openPrice = state.GetAllMarginTrades()[tradeId].OpenPrice;
-            sl = openPrice - atr * 2.5m;
+            if (rsi < 25)
+            {
+                state.AddLogEntry($"rsi sma : {rsi}");
+                state.Trade.Margin.ClosePosition(tradeId);
+                if (fama < mama)
+                {
+                    tradeId = state.Trade.Margin.Long(AmountType.Absolute, state.BaseBalance * borrowAmount);
+                    _tradeOpen = true;
+                    var openPrice = state.GetAllMarginTrades()[tradeId].OpenPrice;
+                    sl = openPrice - atr * 2.5m;
+                }
+            }
+        }
+        // mama has crossed from below
+        if (mamaPrev < famaPrev && mama > fama)
+        {
+            if (_tradeOpen && !_isLong)
+            {
+                state.Trade.Margin.ClosePosition(tradeId);
+                _tradeOpen = false;
+            } 
+            else if (!_tradeOpen)
+            {
+                tradeId = state.Trade.Margin.Long(AmountType.Absolute, state.BaseBalance * borrowAmount);
+                _tradeOpen = true;
+                var openPrice = state.GetAllMarginTrades()[tradeId].OpenPrice;
+                sl = openPrice - atr * 2.5m;
+            }
+            
             // tp = openPrice + atr * 2.5m;
         }
         // mama has crossed under
-        else if (mamaPrev > famaPrev && mama < fama && _tradeOpen)
+        else if (mamaPrev > famaPrev && mama < fama)
         {
-            state.Trade.Margin.ClosePosition(tradeId);
-            _tradeOpen = false;
+            if (_tradeOpen && _isLong)
+            {
+                state.Trade.Margin.ClosePosition(tradeId);
+                _tradeOpen = false;
+            } else if (!_tradeOpen)
+            {
+                tradeId = state.Trade.Margin.Short(AmountType.Absolute, state.BaseBalance * borrowAmount);
+                _tradeOpen = true;
+                _isLong = false;
+                var openPrice = state.GetAllMarginTrades()[tradeId].OpenPrice;
+                sl = openPrice + atr * 2.5m;
+            }
+            
         }
-
-
-        // if(longCondition && !_tradeOpen)
-        // {
-        //     // only risk 2% of equity per trade
-        //     // state.Trade.Spot.Buy(AmountType.Percentage, 2);
-        //     tradeId = state.Trade.Margin.Long(AmountType.Absolute, state.QuoteBalance * 0.50m);
-        //     _tradeOpen = true;
-        //     // var last = state.GetLastSpotTrade();
-        //     var last = state.GetAllMarginTrades()[tradeId].OpenPrice;
-        //     tp = last + atr*3.5m;
-        //     sl = last - atr*3.5m;
-        // }
-        // else if (_tradeOpen && shortCondition)
-        // {
-        //     // state.Trade.Spot.Sell();
-        //     state.Trade.Margin.ClosePosition(tradeId);
-        //     _tradeOpen = false;
-        //      
-        // }
+        
     }
 }

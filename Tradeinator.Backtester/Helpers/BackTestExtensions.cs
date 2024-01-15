@@ -1,6 +1,7 @@
 using System.Text;
 using OoplesFinance.StockIndicators.Models;
 using SimpleBacktestLib;
+using SimpleBacktestLib.Models;
 
 namespace Tradeinator.Backtester.Helpers;
 
@@ -75,12 +76,45 @@ public static class BackTestExtensions
         addLn("% profitable trades", CalculatePctProfitable(r.SpotTrades.ToList()).ToString());
         
         sb.AppendLine();
+        
+        var marginAnalysis = MarginTradeAnalysis(r.MarginTrades.ToList());
+        if (!string.IsNullOrWhiteSpace(marginAnalysis))
+            sb.AppendLine(marginAnalysis);
+        
+        sb.AppendLine();
+        
         sb.AppendLine(extraDetails);
         
         // Print it
         Console.WriteLine(sb.ToString());
     }
 
+
+    private static string MarginTradeAnalysis(List<MarginPosition> positions)
+    {
+        if (!positions.Any()) return "";
+
+        var winning = 0.0;
+        var loosing = 0.0;
+
+        foreach (var pos in positions)
+        {
+            var profit = pos.LeverageRatio - pos.OpenPrice;
+            if (profit > 0.0m) winning++;
+            else loosing++;
+        }
+        
+        
+        
+        
+        
+        return $"""
+               win: {winning}
+               loose : {loosing}
+               win % : {(winning / (winning + loosing))*100:F}
+               """;
+    }
+    
     /// <summary>
     /// calculates the win loss ratio of the trades the system made
     /// assumes that their is no pyramiding (only 1 trade is open at a time)
