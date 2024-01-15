@@ -99,7 +99,8 @@ public static class BackTestExtensions
 
         foreach (var pos in positions)
         {
-            var profit = pos.LeverageRatio - pos.OpenPrice;
+            var profit = pos.MarginDirection == TradeType.MarginLong ? pos.QuoteProfit : pos.BaseProfit;
+                
             if (profit > 0.0m) winning++;
             else loosing++;
         }
