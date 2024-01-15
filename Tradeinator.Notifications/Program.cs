@@ -3,6 +3,7 @@ using DSharpPlus.Entities;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using Tradeinator.Shared;
+using Tradeinator.Shared.Extensions;
 using Tradeinator.Shared.Models;
 
 // load the dotenv file into the environment

@@ -1,9 +1,8 @@
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using RabbitMQ.Client.Events;
 
-namespace Tradeinator.Shared;
+namespace Tradeinator.Shared.Extensions;
 
 public static class BasicDeliverEventArgsExtension
 {

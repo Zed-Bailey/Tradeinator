@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Serilog;
 using Tradeinator.Shared;
+using Tradeinator.Shared.Extensions;
 using Tradeinator.Shared.Models;
 using Tradeinator.Strategy.MeanReversion;
 using Tradeinator.Strategy.Shared;

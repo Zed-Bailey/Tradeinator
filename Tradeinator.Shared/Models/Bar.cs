@@ -3,17 +3,17 @@ namespace Tradeinator.Shared.Models;
 public class Bar
 {
     
-    public DateTime TimeUtc { get; }
+    public DateTime TimeUtc { get; set; }
 
-    public decimal Open { get; }
+    public decimal Open { get; set; }
    
-    public decimal High { get; }
+    public decimal High { get;set; }
 
-    public decimal Low { get; }
+    public decimal Low { get; set;}
 
-    public decimal Close { get; }
+    public decimal Close { get; set;}
 
-    public decimal Volume { get; }
+    public decimal Volume { get; set;}
     
     /// <summary>
     /// Volume Weighted Average Price
