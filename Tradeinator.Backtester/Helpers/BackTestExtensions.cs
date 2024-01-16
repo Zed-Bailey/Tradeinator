@@ -29,11 +29,7 @@ public static class BackTestExtensions
     {
         return s.GetAllSpotTrades().Last();
     }
-
-    public static double LatestValue(this StockData data, string name)
-    {
-        return data.OutputValues[name].LastOrDefault();
-    }
+    
 
     /// <summary>
     /// Pretty prints the backtest results

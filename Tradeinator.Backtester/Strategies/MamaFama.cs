@@ -14,8 +14,8 @@ namespace Tradeinator.Backtester.Strategies;
 [BackTestStrategyMetadata("Mama Fama", StartingBalance = 5000)]
 public class MamaFama : BacktestRunner
 {
-    public override DateTime FromDate { get; set; } = new DateTime(2019, 06, 01);
-    public override DateTime ToDate { get; set; } = new DateTime(2020, 06, 01);
+    public override DateTime FromDate { get; set; } = new DateTime(2019, 01, 01);
+    public override DateTime ToDate { get; set; } = new DateTime(2019, 06, 01);
     
     // public override DateTime FromDate { get; set; } = DateTime.Parse("2016-01-06 21:30");
     // public override DateTime ToDate { get; set; } = new DateTime(2017, 01, 01);
@@ -24,6 +24,7 @@ public class MamaFama : BacktestRunner
 
     private bool _tradeOpen;
     private bool _isLong = false;
+    private int tradeId;
     
     private decimal sl;
     private decimal tp;
@@ -46,7 +47,7 @@ public class MamaFama : BacktestRunner
                 """;
     }
 
-    private int tradeId;
+    
 
     public override void OnFinish(BacktestState state)
     {

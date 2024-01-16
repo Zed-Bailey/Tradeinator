@@ -6,6 +6,17 @@ public static class StockDataExtensions
 {
 
     /// <summary>
+    /// Returns the last 
+    /// </summary>
+    /// <param name="data"></param>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    public static double LatestValue(this StockData data, string name)
+    {
+        return data.OutputValues[name].LastOrDefault();
+    }
+    
+    /// <summary>
     /// checks if series 1 has crossed over series 2
     /// </summary>
     /// <param name="series1">first series key</param>

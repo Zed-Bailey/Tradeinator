@@ -4,6 +4,7 @@ using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Models;
 using SimpleBacktestLib;
 using Tradeinator.Backtester.Helpers;
+using Tradeinator.Shared.Extensions;
 
 namespace Tradeinator.Backtester.Strategies;
 
