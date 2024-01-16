@@ -1,3 +1,5 @@
+using OoplesFinance.StockIndicators.Models;
+
 namespace Tradeinator.Shared.Models;
 
 public class Bar
@@ -21,5 +23,18 @@ public class Bar
     public decimal Vwap { get; }
     
     public int TradeCount { get; }
+
+    public TickerData ToTickerData()
+    {
+        return new TickerData
+        {
+            Open = (double) Open,
+            Close = (double) Close,
+            High = (double) High,
+            Low = (double) Low,
+            Volume = (double) Volume,
+            Date = TimeUtc 
+        };
+    }
     
 }
