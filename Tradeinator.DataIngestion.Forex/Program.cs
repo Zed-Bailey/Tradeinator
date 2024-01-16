@@ -69,8 +69,8 @@ async void TimerTrigger(object? state)
         // post bar to exchange
         exchange.Publish(bar, $"bar.{symbol}");
         logger.Information("Received bar for {Symbol} | {Date} | {O} {H} {L} {C}", 
-            symbol, bar.TimeUtc, bar.Open, bar.High, bar.Low, bar.Close)
-        ;
+            symbol, bar.TimeUtc, bar.Open, bar.High, bar.Low, bar.Close
+        );
         
     }
    
