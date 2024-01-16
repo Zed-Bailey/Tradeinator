@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleBacktestLib", "Simple
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.DataIngestion.Forex", "Tradeinator.DataIngestion.Forex\Tradeinator.DataIngestion.Forex.csproj", "{0C81016D-3D08-4740-8FF7-8B3B86090D5C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Strategy.MamaFama", "Tradeinator.Strategy.MamaFama\Tradeinator.Strategy.MamaFama.csproj", "{0798D6DA-240D-4A57-A338-74689B95DB2D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -84,5 +86,9 @@ Global
 		{0C81016D-3D08-4740-8FF7-8B3B86090D5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C81016D-3D08-4740-8FF7-8B3B86090D5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C81016D-3D08-4740-8FF7-8B3B86090D5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0798D6DA-240D-4A57-A338-74689B95DB2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0798D6DA-240D-4A57-A338-74689B95DB2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0798D6DA-240D-4A57-A338-74689B95DB2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0798D6DA-240D-4A57-A338-74689B95DB2D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
