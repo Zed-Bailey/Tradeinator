@@ -33,7 +33,7 @@ public class MeanReversion : StrategyBase
         //     
         // }
         
-        Log("Initialised strategy");
+        // Log("Initialised strategy");
     }
 
     public override void NewBar(Bar bar)
@@ -41,7 +41,7 @@ public class MeanReversion : StrategyBase
         _closingPrices.Add(bar.Close);
         if (_closingPrices.Count < 20)
         {
-            Log("waiting for more information");
+            // Log("waiting for more information");
             return;
         }
         

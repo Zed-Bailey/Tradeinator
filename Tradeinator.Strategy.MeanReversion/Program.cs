@@ -52,7 +52,7 @@ using var tradeManager = new AlpacaTradeManager(config["ALPACA_KEY"], config["AL
 using var strategy = new MeanReversion(tradeManager, config["ALPACA_KEY"], config["ALPACA_SECRET"], symbols);
 await strategy.Init();
 
-strategy.OnLogEntry += message => logger.Information("{Message}", message);
+// strategy.OnLogEntry += message => logger.Information("{Message}", message);
 
 
 
