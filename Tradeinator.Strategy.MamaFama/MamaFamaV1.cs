@@ -4,6 +4,8 @@ using GeriRemenyi.Oanda.V20.Sdk.Common.Types;
 using OoplesFinance.StockIndicators;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Models;
+using Serilog;
+using Serilog.Core;
 using Tradeinator.Shared.EventArgs;
 using Tradeinator.Shared.Extensions;
 using Tradeinator.Shared.Models;
@@ -26,13 +28,19 @@ public class MamaFamaV1 : StrategyBase
     private string _transactionId = "";
     
     private OandaTradeManager _tradeManager;
-
+    private Logger _logger;
+    
     public MamaFamaV1(string accountId, string apiToken)
     {
         _accountId = accountId;
         _apiToken = apiToken;
         _oandaApiConnection = new OandaApiConnection(OandaConnectionType.FxPractice, _apiToken);
         _tradeManager = new OandaTradeManager(_apiToken);
+        
+        _logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .WriteTo.File($"{nameof(MamaFamaV3)}.log")
+            .CreateLogger();
     }
 
     public override async Task Init()
@@ -74,7 +82,7 @@ public class MamaFamaV1 : StrategyBase
         var trade = await _oandaApiConnection.TradeApi.GetTradeAsync(_accountId, id);
         if (trade.Trade.StopLossOrder.State is OrderState.TRIGGERED or OrderState.FILLED)
         {
-            OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateStopLossTriggeredMessage(trade.Trade)));
+            OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateStopLossTriggeredMessage(nameof(MamaFamaV1), trade.Trade)));
         }
     }
 
@@ -130,21 +138,23 @@ public class MamaFamaV1 : StrategyBase
             {
                 // state.Trade.Margin.ClosePosition(tradeId);
                 var pos = await _tradeManager.ClosePosition(_accountId, false);
-                OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateClosePositionMessage(pos, isLongPosition: false)));
+                _logger.Information("Fama crossed over Mama, closed short position, {Id}", _transactionId);
+                OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateClosePositionMessage(nameof(MamaFamaV1),pos, isLongPosition: false)));
                 _tradeOpen = false;
             }
             if (!_tradeOpen)
             {
                 // tradeId = state.Trade.Margin.Long(AmountType.Absolute, state.BaseBalance * borrowAmount);
                 var pos = await _tradeManager.OpenLongPosition(_accountId, account.Balance * borrowAmount, adaptiveTs);
-                if (pos.ErrorCode == "201")
+                if (string.IsNullOrEmpty(pos.ErrorCode))
                 {
                     _transactionId = pos.OrderCreateTransaction.BatchID.ToString();
                     _tradeOpen = true;
                     _isLong = true;
+                    _logger.Information("Fama crossed over Mama, opened long position, {Id}", _transactionId);
                 }
 
-                OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateOpenOrderMessage(pos)));
+                OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateOpenOrderMessage(nameof(MamaFamaV1),pos)));
 
             }
 
@@ -157,21 +167,24 @@ public class MamaFamaV1 : StrategyBase
             if (_tradeOpen && _isLong)
             {
                 var closePos = await _tradeManager.ClosePosition(_accountId);
-                OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateClosePositionMessage(closePos, isLongPosition: true)));
+                OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateClosePositionMessage(nameof(MamaFamaV1),closePos, isLongPosition: true)));
                 _tradeOpen = false;
+                _logger.Information("Fama crossed under Mama, closed long position {Id}", _transactionId);
             }
             
             if (!_tradeOpen)
             {
                 var pos = await _tradeManager.OpenShortPosition(_accountId, 50, adaptiveTs);
-                if (pos.ErrorCode == "201")
+                if (string.IsNullOrEmpty(pos.ErrorCode))
                 {
                     _tradeOpen = true;
                     _transactionId = pos.OrderCreateTransaction.BatchID.ToString();
                     _isLong = false;
+                    _logger.Information("Fama crossed under Mama, opened short position {Id}", _transactionId);
+
                 }
 
-                OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateOpenOrderMessage(pos)));
+                OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateOpenOrderMessage(nameof(MamaFamaV1),pos)));
             }
 
             return;
@@ -181,6 +194,7 @@ public class MamaFamaV1 : StrategyBase
 
     public override async ValueTask DisposeAsync()
     {
+        _logger.Information("stopping strategy");
         // add 5 pip take profit to the open trade
         if (_tradeOpen)
         {
@@ -188,10 +202,12 @@ public class MamaFamaV1 : StrategyBase
             // if position has profit, close
             if (trade.Trade.UnrealizedPL > 0)
             {
+                _logger.Information("Open position {Id} had unrealized P/L, closing now", _transactionId);
                 await _tradeManager.ClosePosition(_accountId, _isLong);
                 return;
             }
             
+            _logger.Information("Setting take profit for trade");
             // add a take profit order to the position of 5 pips
             var opened = trade.Trade.Price;
             double takeProfitPrice;
@@ -213,6 +229,8 @@ public class MamaFamaV1 : StrategyBase
                 )
             );
         }
+
+        await _logger.DisposeAsync();
     }
 
 

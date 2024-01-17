@@ -12,18 +12,31 @@ using Tradeinator.Strategy.Shared;
 var configLoader = new ConfigurationLoader(Directory.GetCurrentDirectory());
 configLoader.LoadConfiguration();
 
-var strategyVersion1 = configLoader.Get("Account:SV1");
-var strategyVersion2 = configLoader.Get("Account:SV2");
+var strategyVersion1 = configLoader.Get("Accounts:SV1");
+var strategyVersion2 = configLoader.Get("Accounts:SV2");
+var strategyVersion3 = configLoader.Get("Accounts:SV3");
 var apiToken = configLoader.Get("OANDA_API_TOKEN");
 
 
+if (string.IsNullOrEmpty(strategyVersion1) || string.IsNullOrEmpty(strategyVersion2) || string.IsNullOrEmpty(strategyVersion3))
+{
+    Console.WriteLine("[ERROR] empty account number(s)");
+    return;
+}
 
-// initialise serilog logger, writing to console and file
+if (string.IsNullOrEmpty(apiToken))
+{
+    Console.WriteLine("[ERROR] Oanda api token was null or empty");
+    return;
+}
+
+
+// initialise serilog loggers for each strategy, writing to console and file
+
 await using var logger = new LoggerConfiguration()
     .WriteTo.Console()
-    .WriteTo.File("mama_fama.log")
+    .WriteTo.File("general.log")
     .CreateLogger();
-
 
 
 var tokenSource = new CancellationTokenSource();
@@ -44,10 +57,12 @@ using var exchange = new PublisherReceiverExchange(
 
 await using var strategy1 = new MamaFamaV1(strategyVersion1, apiToken);
 await using var strategy2 = new MamaFamaV2(strategyVersion2, apiToken);
+await using var strategy3 = new MamaFamaV3(strategyVersion3, apiToken);
 
 
 strategy1.SendMessageNotification += OnSendMessageNotification;
 strategy2.SendMessageNotification += OnSendMessageNotification;
+strategy3.SendMessageNotification += OnSendMessageNotification;
 
 await strategy1.Init();
 await strategy2.Init();
@@ -63,6 +78,7 @@ exchange.ConsumerOnReceive += (sender, eventArgs) =>
     
     strategy1.NewBar(bar);
     strategy2.NewBar(bar);
+    strategy3.NewBar(bar);
 };
 
 await exchange.StartConsuming(tokenSource.Token);

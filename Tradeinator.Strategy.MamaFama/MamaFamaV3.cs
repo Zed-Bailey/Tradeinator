@@ -13,7 +13,7 @@ using Tradeinator.Strategy.Shared;
 
 namespace Tradeinator.Strategy.MamaFama;
 
-public class MamaFamaV2 : StrategyBase
+public class MamaFamaV3 : StrategyBase
 {
     private string _accountId;
     private string _apiToken;
@@ -29,16 +29,20 @@ public class MamaFamaV2 : StrategyBase
     private double _accountBalance;
     
     private OandaTradeManager _tradeManager;
+
+
     private Logger _logger;
-    public MamaFamaV2(string accountId, string apiToken)
+    
+    public MamaFamaV3(string accountId, string apiToken)
     {
         _accountId = accountId;
         _apiToken = apiToken;
         _oandaApiConnection = new OandaApiConnection(OandaConnectionType.FxPractice, _apiToken);
         _tradeManager = new OandaTradeManager(_apiToken);
+        
         _logger = new LoggerConfiguration()
             .WriteTo.Console()
-            .WriteTo.File($"{nameof(MamaFamaV2)}.log")
+            .WriteTo.File($"{nameof(MamaFamaV3)}.log")
             .CreateLogger();
     }
 
@@ -81,7 +85,7 @@ public class MamaFamaV2 : StrategyBase
         var trade = await _oandaApiConnection.TradeApi.GetTradeAsync(_accountId, id);
         if (trade.Trade.StopLossOrder.State is OrderState.TRIGGERED or OrderState.FILLED)
         {
-            OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateStopLossTriggeredMessage(nameof(MamaFamaV2), trade.Trade)));
+            OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateStopLossTriggeredMessage(nameof(MamaFamaV3), trade.Trade)));
         }
     }
 
@@ -138,7 +142,7 @@ public class MamaFamaV2 : StrategyBase
             {
                 // state.Trade.Margin.ClosePosition(tradeId);
                 var pos = await _tradeManager.ClosePosition(_accountId, false);
-                OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateClosePositionMessage(nameof(MamaFamaV2),pos, isLongPosition: false)));
+                OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateClosePositionMessage(nameof(MamaFamaV3),pos, isLongPosition: false)));
                 _tradeOpen = false;
             }
             if (!_tradeOpen)
@@ -152,7 +156,7 @@ public class MamaFamaV2 : StrategyBase
                     _isLong = true;
                 }
 
-                OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateOpenOrderMessage(nameof(MamaFamaV2), pos)));
+                OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateOpenOrderMessage(nameof(MamaFamaV3), pos)));
 
             }
 
@@ -165,7 +169,7 @@ public class MamaFamaV2 : StrategyBase
             if (_tradeOpen && _isLong)
             {
                 var closePos = await _tradeManager.ClosePosition(_accountId);
-                OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateClosePositionMessage(nameof(MamaFamaV2),closePos, isLongPosition: true)));
+                OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateClosePositionMessage(nameof(MamaFamaV3),closePos, isLongPosition: true)));
                 _tradeOpen = false;
             }
             
@@ -179,7 +183,7 @@ public class MamaFamaV2 : StrategyBase
                     _isLong = false;
                 }
 
-                OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateOpenOrderMessage(nameof(MamaFamaV2),pos)));
+                OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateOpenOrderMessage(nameof(MamaFamaV3),pos)));
             }
 
             return;
@@ -194,7 +198,7 @@ public class MamaFamaV2 : StrategyBase
     {
         stockData.Clear();
         
-        var rrsi = stockData.CalculateReverseEngineeringRelativeStrengthIndex(rsiLevel: 50);
+        var rrsi = stockData.CalculateReverseEngineeringRelativeStrengthIndex(rsiLevel: 45);
         
         
         var latest = rrsi.LatestValue("Rersi");
@@ -210,7 +214,7 @@ public class MamaFamaV2 : StrategyBase
                     _tradeOpen = true;
                     _transactionId = pos.OrderCreateTransaction.BatchID.ToString();
                 }
-                OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateOpenOrderMessage(nameof(MamaFamaV2),pos)));
+                OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateOpenOrderMessage(nameof(MamaFamaV3),pos)));
                 // state.AddLogEntry("close crossover");
                 return;
             }
@@ -225,7 +229,7 @@ public class MamaFamaV2 : StrategyBase
                    
                 // state.AddLogEntry("close crossunder");
                 var closePos = await _tradeManager.ClosePosition(_accountId);
-                OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateClosePositionMessage(nameof(MamaFamaV2),closePos, isLongPosition: true)));
+                OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateClosePositionMessage(nameof(MamaFamaV3),closePos, isLongPosition: true)));
                 _tradeOpen = false;
             }
         }

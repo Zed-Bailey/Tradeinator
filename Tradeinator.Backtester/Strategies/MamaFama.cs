@@ -14,8 +14,8 @@ namespace Tradeinator.Backtester.Strategies;
 [BackTestStrategyMetadata("Mama Fama", StartingBalance = 5000)]
 public class MamaFama : BacktestRunner
 {
-    public override DateTime FromDate { get; set; } = new DateTime(2019, 01, 01);
-    public override DateTime ToDate { get; set; } = new DateTime(2019, 06, 01);
+    public override DateTime FromDate { get; set; } = new DateTime(2019, 06, 01);
+    public override DateTime ToDate { get; set; } = new DateTime(2020, 01, 01);
     
     // public override DateTime FromDate { get; set; } = DateTime.Parse("2016-01-06 21:30");
     // public override DateTime ToDate { get; set; } = new DateTime(2017, 01, 01);
@@ -95,10 +95,7 @@ public class MamaFama : BacktestRunner
         }
         
         var stockData = new StockData(_tickerData);
-    
-        // var mmi = stockData.CalculateMarketMeannessIndex(MovingAvgType.HullMovingAverage);
-        // var meanness = mmi.LatestValue("Mmi");
-        // var isTrending = meanness < 75;
+        
         var adx = stockData.CalculateAverageDirectionalIndex().LatestValue("Adx");
         var isTrending = adx > 25;
         
@@ -112,8 +109,6 @@ public class MamaFama : BacktestRunner
         var famaMamaCrossOver = ehlersMotherAMA.CrossOver("Mama", "Fama");
         var famaMamaCrossUnder = ehlersMotherAMA.CrossUnder("Mama", "Fama");
 
-        stockData.Clear();
-        var rsi = stockData.CalculateEhlersAdaptiveRelativeStrengthIndexV1().LatestValue("Earsi");
         stockData.Clear();
         
         // borrow less in a ranging market
@@ -157,52 +152,16 @@ public class MamaFama : BacktestRunner
             return;
 
         }
-        // else if (_tradeOpen)
-        // {
-        //     
-        //     // close short position and create new position
-        //     if (!_isLong && rsi is < 20 and > 0)
-        //     {
-        //         state.AddLogEntry($"rsi short buy trigger : {rsi}");
-        //         state.Trade.Margin.ClosePosition(tradeId);
-        //         _tradeOpen = false;
-        //         if (fama < mama)
-        //         {
-        //             tradeId = state.Trade.Margin.Long(AmountType.Absolute, state.BaseBalance * borrowAmount);
-        //             _tradeOpen = true;
-        //             sl = adaptiveTs;
-        //             _isLong = true;
-        //         }
-        //     } 
-        //     else if (_isLong && rsi > 90)
-        //     {
-        //         state.AddLogEntry($"rsi long sell trigger : {rsi}");
-        //         state.Trade.Margin.ClosePosition(tradeId);
-        //         _tradeOpen = false;
-        //         
-        //         if (fama > mama)
-        //         {
-        //             tradeId = state.Trade.Margin.Short(AmountType.Absolute, state.BaseBalance * borrowAmount);
-        //             _tradeOpen = true;
-        //             _isLong = false;
-        //             sl = adaptiveTs;
-        //         }
-        //     }
-        // }
         
         
-        SecondaryTrigger(state, stockData, borrowAmount);
+        SecondaryTrigger(state, stockData, borrowAmount, adaptiveTs);
         
     }
 
-    private void SecondaryTrigger(BacktestState state, StockData stockData, decimal borrowAmount)
+    private void SecondaryTrigger(BacktestState state, StockData stockData, decimal borrowAmount, decimal stopLossPrice)
     {
         stockData.Clear();
-
-        // var rsi = stockData.CalculateEhlersAdaptiveRelativeStrengthIndexV2();// // Earsi
-        
-        
-        var rrsi = stockData.CalculateReverseEngineeringRelativeStrengthIndex(rsiLevel: 45);
+        var rrsi = stockData.CalculateReverseEngineeringRelativeStrengthIndex(rsiLevel: 50);
         
         
         var latest = rrsi.LatestValue("Rersi");
@@ -215,6 +174,7 @@ public class MamaFama : BacktestRunner
                 _isLong = true;
                 _tradeOpen = true;
                 tradeId = state.Trade.Margin.Long(AmountType.Absolute, borrowAmount);
+                sl = stopLossPrice;
                 return;
             }
         }

@@ -6,13 +6,13 @@ namespace Tradeinator.Strategy.MamaFama;
 public class OrderMessageCreator
 {
 
-    public static SystemMessage CreateStopLossTriggeredMessage(Trade trade)
+    public static SystemMessage CreateStopLossTriggeredMessage(string strategy, Trade trade)
     {
         var msg = new SystemMessage()
         {
             Priority = MessagePriority.Information,
             Symbol = "AUD/CHF",
-            StrategyName = nameof(MamaFamaV1),
+            StrategyName = strategy,
         };
 
         msg.Message = $"""
@@ -31,7 +31,7 @@ public class OrderMessageCreator
         return msg;
     }
     
-    public static SystemMessage CreateOpenOrderMessage(CreateOrderResponse response)
+    public static SystemMessage CreateOpenOrderMessage(string strategy, CreateOrderResponse response)
     {
         
         var severity = response.ErrorCode == "201" ? MessagePriority.Information : MessagePriority.Critical;
@@ -48,7 +48,7 @@ public class OrderMessageCreator
         {
             Priority = severity,
             Symbol = "AUD/CHF",
-            StrategyName = nameof(MamaFamaV1),
+            StrategyName = strategy,
             Message = msg
         };
     }
@@ -59,13 +59,13 @@ public class OrderMessageCreator
     /// <param name="response"></param>
     /// <param name="isLongPosition">set to false for short position</param>
     /// <returns></returns>
-    public static SystemMessage CreateClosePositionMessage(ClosePositionResponse response, bool isLongPosition = true)
+    public static SystemMessage CreateClosePositionMessage(string strategy, ClosePositionResponse response, bool isLongPosition = true)
     {
         var msg = new SystemMessage()
         {
             Priority = MessagePriority.Information,
             Symbol = "AUD/CHF",
-            StrategyName = nameof(MamaFamaV1),
+            StrategyName = strategy,
             Message = $"""
                        Closed long position.
                        closed order = {response.LongOrderCreateTransaction.BatchID}
