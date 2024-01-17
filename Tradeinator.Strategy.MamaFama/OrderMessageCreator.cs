@@ -5,6 +5,31 @@ namespace Tradeinator.Strategy.MamaFama;
 
 public class OrderMessageCreator
 {
+
+    public static SystemMessage CreateStopLossTriggeredMessage(Trade trade)
+    {
+        var msg = new SystemMessage()
+        {
+            Priority = MessagePriority.Information,
+            Symbol = "AUD/CHF",
+            StrategyName = nameof(MamaFamaV1),
+        };
+
+        msg.Message = $"""
+                       Stop loss triggered for order = {trade.Id}
+                       open time = {trade.OpenTime}
+                       open price = {trade.Price}
+                       
+                       close time = {trade.CloseTime}
+                       close price = {trade.AverageClosePrice}
+                       
+                       P/L = {trade.RealizedPL}
+                       units = {trade.InitialUnits}
+                       """;
+        
+
+        return msg;
+    }
     
     public static SystemMessage CreateOpenOrderMessage(CreateOrderResponse response)
     {
