@@ -45,9 +45,9 @@ Options are then displayed allowing you to select which backtest to run (see ima
 Spectre.Console is used to pretty print options to the console
 
 ## Tradeinator.Dashboard
-A blazor server web application built with the FluentUI UI Kit.
+A blazor server web application built with the Microsofts Fluent UI.
 
-Provides a dashboard showing account balances, trades and more
+Will provides a dashboard showing account balances, trades and more
 
 ## Tradeinator.EventTester
 A Terminal GUI program to connect to the exchange and easily send test events
@@ -64,6 +64,13 @@ Symbols to subscribe to are registered in the projects `symbols.txt` file
 
 ## Tradeinator.DataIngestion.Stocks
 This is the entry point for all stock data into the system.
+
+Symbols to subscribe to are registered in the projects `symbols.txt` file
+
+## Tradeinator.DataIngestion.Forex
+This is the entry point for all forex data into the system.
+
+Data is fetched from Oanda, currently only 30 minute bars are supported.
 
 Symbols to subscribe to are registered in the projects `symbols.txt` file
 
