@@ -1,0 +1,28 @@
+﻿@using Microsoft.FluentUI.AspNetCore.Components
+@inherits LayoutComponentBase
+
+<PageTitle>Tradeinator - Dashboard</PageTitle>
+
+<FluentLayout >
+    <FluentHeader>
+        Tradeinator Dashboard
+    </FluentHeader>
+    <FluentStack Orientation="Orientation.Horizontal">
+        
+        <NavMenu/>
+        
+        <FluentBodyContent Class="p-2 pe-2 ">
+            
+            @Body
+            
+            <FluentToastProvider/>
+            <FluentDialogProvider/>
+            <FluentTooltipProvider/>
+            <FluentMessageBarProvider/>    
+            
+            
+        </FluentBodyContent>
+        
+    </FluentStack>
+    
+</FluentLayout>

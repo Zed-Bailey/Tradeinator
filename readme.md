@@ -44,6 +44,10 @@ Options are then displayed allowing you to select which backtest to run (see ima
 
 Spectre.Console is used to pretty print options to the console
 
+## Tradeinator.Dashboard
+A blazor server web application built with the FluentUI UI Kit.
+
+Provides a dashboard showing account balances, trades and more
 
 ## Tradeinator.EventTester
 A Terminal GUI program to connect to the exchange and easily send test events

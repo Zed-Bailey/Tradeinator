@@ -1,6 +1,7 @@
 using System.Globalization;
 using Alpaca.Markets;
 using CsvHelper;
+using CsvHelper.Configuration;
 using SimpleBacktestLib;
 using Spectre.Console;
 
@@ -15,9 +16,10 @@ public static class DataFetcher
         List<BacktestCandle> candleData;
         if (File.Exists(dataPath))
         {
+            
             Console.WriteLine("existing data path found, loading from csv file");
             using (var reader = new StreamReader(dataPath))
-            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+            using (var csv = new CsvReader(reader, CultureInfo.CurrentCulture))
             {
                 candleData = csv.GetRecords<BacktestCandle>().ToList();
             }

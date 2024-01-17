@@ -1,18 +1,25 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using System.Text;
 using Alpaca.Markets;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using SimpleBacktestLib;
+using SimpleBacktestLib.Models;
 using Spectre.Console;
 using Tradeinator.Backtester.Helpers;
 using Tradeinator.Shared;
 
 // default symbol strategies are executed on
 var SYMBOL = "BTC/USD";
-
+var runFancyBacktest = false;
 if (args.Length > 0)
 {
     SYMBOL = args[0];
+    if (args.Contains("--fancy"))
+    {
+        runFancyBacktest = true;
+    }
 }
 
 // required otherwise the console will be all messed up
@@ -41,6 +48,9 @@ if (key == null || secret == null)
 AnsiConsole.Clear();
 
 
+
+
+
 var availableStrategies = GetAvailableStrategies();
 var strategy = GetStrategyToRun(availableStrategies);
 if (strategy == null)
@@ -61,11 +71,12 @@ var candleData = (await DataFetcher.GetData(SYMBOL, Directory.GetCurrentDirector
 stopwatch.Stop();
 if (candleData.Count == 0)
 {
-    AnsiConsole.MarkupLine("[red]Failed to load data[/]");
+    AnsiConsole.MarkupLine("[red]Failed to load data, there was no data[/]");
     return;
 }
 
 AnsiConsole.MarkupLineInterpolated($"[green]Loaded data in {stopwatch.ElapsedMilliseconds:F2}ms[/]");
+
 
 
 // initialise the strategy
@@ -76,24 +87,32 @@ await backtest.InitStrategy(SYMBOL, dataClient);
 //
 //
 var builder = BacktestBuilder.CreateBuilder(candleData)
-    .WithQuoteBudget((decimal) strategy.attribute.StartingBalance)
+    .WithQuoteBudget((decimal) strategy.attribute.StartingBalance / 2)
+    .WithBaseBudget((decimal) strategy.attribute.StartingBalance / 2)
+    .WithMarginLeverageRatio(30)
+    .WithDefaultMarginLongOrderSize(AmountType.Percentage, 5)
     .AddSpotFee(AmountType.Percentage, 0.15m, FeeSource.Base)
     .AddSpotFee(AmountType.Percentage, 0.15m, FeeSource.Quote)
-    .EvaluateBetween(backtest.FromDate, backtest.ToDate)
-    .OnTick(state =>
-    {
-        backtest.OnTick(state);
-    })
-    .OnLogEntry((entry, _) => Console.WriteLine(entry));
-    
+    .EvaluateBetween(backtest.FromDate, backtest.ToDate);
 
+
+// index of the last candle
+var lastCandleIndex = candleData.FindIndex(c => c.Time > backtest.ToDate) - 1;
+
+BacktestResult? backtestResult = null;
 
 stopwatch.Restart();
-var results = await builder.RunAsync();
+
+if (runFancyBacktest)
+    backtestResult = await FancyBackTest.RunFancyBacktest(builder, backtest, lastCandleIndex);
+else
+    backtestResult = await SimpleBackTest.RunSimpleBacktest(builder, backtest, lastCandleIndex);
+
 stopwatch.Stop();
 
-Console.WriteLine($"Completed backtest in {stopwatch.ElapsedMilliseconds:00}ms");
-results.PrettyPrintResults(SYMBOL, backtest.ExtraDetails());
+AnsiConsole.MarkupLineInterpolated($"[green]Completed backtest in {stopwatch.ElapsedMilliseconds:00}ms [/]");
+
+backtestResult.PrettyPrintResults(SYMBOL, backtest.ExtraDetails());
 return;
 
 

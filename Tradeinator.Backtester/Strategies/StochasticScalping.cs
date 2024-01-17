@@ -8,11 +8,12 @@ using Tradeinator.Backtester.Helpers;
 
 namespace Tradeinator.Backtester.Strategies;
 
-[BackTestStrategyMetadata("Stochastic scalping", StartingBalance = 500)]
+[BackTestStrategyMetadata("Stochastic scalping", StartingBalance = 5000)]
 public class StochasticScalping : BacktestRunner
 {
-    public override DateTime FromDate { get; set; } = new DateTime(2022, 06, 01);
-    
+    // public override DateTime FromDate { get; set; } = new DateTime(2022, 06, 01);
+    public override DateTime FromDate { get; set; } = DateTime.Parse("2016-01-06 21:30");
+
     private List<TickerData> _tickerData = new();
 
     private bool _tradeOpen;
@@ -38,6 +39,8 @@ public class StochasticScalping : BacktestRunner
                 """;
     }
 
+    private int tradeId;
+    
     public override void OnTick(BacktestState state)
     {
         var candle = state.GetCurrentCandle().CandleToTicker();
@@ -53,17 +56,19 @@ public class StochasticScalping : BacktestRunner
 
         if (_tradeOpen)
         {
-            if ((decimal)candle.Close < sl )
+            if ((decimal)candle.Close <= sl )
             {
-                state.Trade.Spot.Sell();
+                // state.Trade.Spot.Sell();
+                state.Trade.Margin.ClosePosition(tradeId);
                 _tradeOpen = false;
                 _slHit++;
                 return;
             } 
             
-            if ((decimal) candle.Close > tp)
+            if ((decimal) candle.Close >= tp)
             {
-                state.Trade.Spot.Sell();
+                state.Trade.Margin.ClosePosition(tradeId);
+                // state.Trade.Spot.Sell();
                 _tradeOpen = false;
                 _tpHit++;
                 return;
@@ -99,17 +104,20 @@ public class StochasticScalping : BacktestRunner
         if(longCondition && !_tradeOpen)
         {
             // only risk 2% of equity per trade
-            state.Trade.Spot.Buy(AmountType.Percentage, 2);
+            // state.Trade.Spot.Buy(AmountType.Percentage, 2);
+            tradeId = state.Trade.Margin.Long(AmountType.Absolute, state.QuoteBalance * 0.25m);
             _tradeOpen = true;
-            var last = state.GetLastSpotTrade();
-            tp = last.QuotePrice + atr;
-            sl = last.QuotePrice - atr;
+            // var last = state.GetLastSpotTrade();
+            var last = state.GetAllMarginTrades()[tradeId].OpenPrice;
+            tp = last + atr*3.5m;
+            sl = last - atr*3.5m;
         }
-        else if (_tradeOpen && shortCondition)
-        {
-            state.Trade.Spot.Sell();
-            _tradeOpen = false;
-             
-        }
+        // else if (_tradeOpen && shortCondition)
+        // {
+        //     // state.Trade.Spot.Sell();
+        //     state.Trade.Margin.ClosePosition(tradeId);
+        //     _tradeOpen = false;
+        //      
+        // }
     }
 }
