@@ -72,7 +72,7 @@ exchange.ConsumerOnReceive += (sender, eventArgs) =>
     
     // split the routing key on the '.' to get the symbol the message is for
     var routingKey = eventArgs.RoutingKey.Split('.');
-    var symbol = routingKey.Length > 1 ? routingKey[1] : eventArgs.RoutingKey;
+    var symbol = msg.Symbol;
 
     // build the message body
     var msgBuilder = new DiscordMessageBuilder()
@@ -80,6 +80,7 @@ exchange.ConsumerOnReceive += (sender, eventArgs) =>
                      **{symbol}**
                      *Priority*: {msg.Priority}
                      *Time*: {msg.Time}
+                     *Strategy*: {msg.StrategyName}
                      {msg.Message}
                      """);
     
