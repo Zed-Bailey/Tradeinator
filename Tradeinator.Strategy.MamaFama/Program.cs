@@ -42,15 +42,15 @@ using var exchange = new PublisherReceiverExchange(
 
 
 
-using var strategy1 = new MamaFamaV1(strategyVersion1, apiToken);
-// var strategy2 = new MamaFamaV2(strategyVersion2, apiToken);
+await using var strategy1 = new MamaFamaV1(strategyVersion1, apiToken);
+await using var strategy2 = new MamaFamaV2(strategyVersion2, apiToken);
 
 
 strategy1.SendMessageNotification += OnSendMessageNotification;
-// strategy2.SendMessageNotification += OnSendMessageNotification;
+strategy2.SendMessageNotification += OnSendMessageNotification;
 
 await strategy1.Init();
-// await strategy2.Init();
+await strategy2.Init();
 
 exchange.ConsumerOnReceive += (sender, eventArgs) =>
 {
@@ -62,7 +62,7 @@ exchange.ConsumerOnReceive += (sender, eventArgs) =>
     }
     
     strategy1.NewBar(bar);
-    // strategy2.NewBar(bar);
+    strategy2.NewBar(bar);
 };
 
 await exchange.StartConsuming(tokenSource.Token);

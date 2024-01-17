@@ -11,7 +11,7 @@ using Tradeinator.Strategy.Shared;
 
 namespace Tradeinator.Strategy.MamaFama;
 
-public class MamaFamaV1 : StrategyBase
+public class MamaFamaV2 : StrategyBase
 {
     private string _accountId;
     private string _apiToken;
@@ -27,7 +27,7 @@ public class MamaFamaV1 : StrategyBase
     
     private OandaTradeManager _tradeManager;
 
-    public MamaFamaV1(string accountId, string apiToken)
+    public MamaFamaV2(string accountId, string apiToken)
     {
         _accountId = accountId;
         _apiToken = apiToken;
@@ -175,6 +175,43 @@ public class MamaFamaV1 : StrategyBase
             }
 
             return;
+        }
+        
+    }
+
+
+    private async Task SecondaryTrigger(StockData stockData, double borrowAmount)
+    {
+        stockData.Clear();
+        
+        var rrsi = stockData.CalculateReverseEngineeringRelativeStrengthIndex(rsiLevel: 45);
+        
+        
+        var latest = rrsi.LatestValue("Rersi");
+        // close crosses over
+        if (stockData.ClosePrices[^2] < latest && stockData.ClosePrices[^1] > latest)
+        {
+            if (!_tradeOpen)
+            {
+                // state.AddLogEntry("close crossover");
+                // _isLong = true;
+                // _tradeOpen = true;
+                // tradeId = state.Trade.Margin.Long(AmountType.Absolute, borrowAmount);
+                return;
+            }
+        }
+
+      
+        // close crosses under 
+        if (stockData.ClosePrices[^2] > latest && stockData.ClosePrices[^1] < latest)
+        {
+            if (_tradeOpen && _isLong)
+            {
+                   
+                // state.AddLogEntry("close crossunder");
+                // state.Trade.Margin.ClosePosition(tradeId);
+                _tradeOpen = false;
+            }
         }
         
     }
