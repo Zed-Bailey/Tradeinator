@@ -6,8 +6,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Shared", "Trade
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Listener", "Tradeinator.Listener\Tradeinator.Listener.csproj", "{4EFF3DC8-F9F9-4EB0-A0DA-9D87D867729A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Strategy.MeanReversion", "Tradeinator.Strategy.MeanReversion\Tradeinator.Strategy.MeanReversion.csproj", "{BF0F204C-F073-476E-91CF-E35B0D430AA7}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Backtester", "Tradeinator.Backtester\Tradeinator.Backtester.csproj", "{9BBCA798-1C4E-4C7F-9F5E-FF01481CFF76}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Strategy.Shared", "Tradeinator.Strategy.Shared\Tradeinator.Strategy.Shared.csproj", "{BB2C97F6-2AF4-4121-B91F-4743FAA846B7}"
@@ -46,10 +44,6 @@ Global
 		{4EFF3DC8-F9F9-4EB0-A0DA-9D87D867729A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4EFF3DC8-F9F9-4EB0-A0DA-9D87D867729A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4EFF3DC8-F9F9-4EB0-A0DA-9D87D867729A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BF0F204C-F073-476E-91CF-E35B0D430AA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BF0F204C-F073-476E-91CF-E35B0D430AA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BF0F204C-F073-476E-91CF-E35B0D430AA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BF0F204C-F073-476E-91CF-E35B0D430AA7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9BBCA798-1C4E-4C7F-9F5E-FF01481CFF76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9BBCA798-1C4E-4C7F-9F5E-FF01481CFF76}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9BBCA798-1C4E-4C7F-9F5E-FF01481CFF76}.Release|Any CPU.ActiveCfg = Release|Any CPU
