@@ -78,6 +78,7 @@ public class MamaFamaV2 : StrategyBase
     
     private async void PositionNotOpenAnymore(string id)
     {
+        _logger.Information("stop loss triggered for trade {Id}", id);
         var trade = await _oandaApiConnection.TradeApi.GetTradeAsync(_accountId, id);
         if (trade.Trade.StopLossOrder.State is OrderState.TRIGGERED or OrderState.FILLED)
         {
@@ -136,7 +137,7 @@ public class MamaFamaV2 : StrategyBase
         {
             if (_tradeOpen && !_isLong)
             {
-                // state.Trade.Margin.ClosePosition(tradeId);
+                _logger.Information("fama crossed over mama, closing short position {Id}", _transactionId);
                 var pos = await _tradeManager.ClosePosition(_accountId, false);
                 OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateClosePositionMessage(nameof(MamaFamaV2),pos, isLongPosition: false)));
                 _tradeOpen = false;
@@ -144,10 +145,12 @@ public class MamaFamaV2 : StrategyBase
             if (!_tradeOpen)
             {
                 // tradeId = state.Trade.Margin.Long(AmountType.Absolute, state.BaseBalance * borrowAmount);
+                
                 var pos = await _tradeManager.OpenLongPosition(_accountId, borrowAmount, adaptiveTs);
                 if (string.IsNullOrEmpty(pos.ErrorCode))
                 {
-                    _transactionId = pos.OrderCreateTransaction.BatchID.ToString();
+                    _transactionId = pos.OrderFillTransaction.TradeOpened.TradeID.ToString();
+                    _logger.Information("fama crossed over mama, opened long position {Id}", _transactionId);
                     _tradeOpen = true;
                     _isLong = true;
                 }
@@ -164,6 +167,7 @@ public class MamaFamaV2 : StrategyBase
         {
             if (_tradeOpen && _isLong)
             {
+                _logger.Information("fama crossed under mama, closing long position {Id}", _transactionId);
                 var closePos = await _tradeManager.ClosePosition(_accountId);
                 OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateClosePositionMessage(nameof(MamaFamaV2),closePos, isLongPosition: true)));
                 _tradeOpen = false;
@@ -174,8 +178,10 @@ public class MamaFamaV2 : StrategyBase
                 var pos = await _tradeManager.OpenShortPosition(_accountId, borrowAmount, adaptiveTs);
                 if (string.IsNullOrEmpty(pos.ErrorCode))
                 {
+                    
                     _tradeOpen = true;
-                    _transactionId = pos.OrderCreateTransaction.BatchID.ToString();
+                    _transactionId = pos.OrderFillTransaction.TradeOpened.TradeID.ToString();
+                    _logger.Information("fama crossed under mama, opening short position {Id}", _transactionId);
                     _isLong = false;
                 }
 
@@ -208,10 +214,10 @@ public class MamaFamaV2 : StrategyBase
                 {
                     _isLong = true;
                     _tradeOpen = true;
-                    _transactionId = pos.OrderCreateTransaction.BatchID.ToString();
+                    _transactionId = pos.OrderFillTransaction.TradeOpened.TradeID.ToString();
+                    _logger.Information("close price crossed over rrsi,opening long position {Id}", _transactionId);
                 }
                 OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateOpenOrderMessage(nameof(MamaFamaV2),pos)));
-                // state.AddLogEntry("close crossover");
                 return;
             }
         }
@@ -222,8 +228,7 @@ public class MamaFamaV2 : StrategyBase
         {
             if (_tradeOpen && _isLong)
             {
-                   
-                // state.AddLogEntry("close crossunder");
+                _logger.Information("close price crossed under rrsi, closing long position {Id}", _transactionId);
                 var closePos = await _tradeManager.ClosePosition(_accountId);
                 OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateClosePositionMessage(nameof(MamaFamaV2),closePos, isLongPosition: true)));
                 _tradeOpen = false;

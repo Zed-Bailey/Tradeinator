@@ -79,6 +79,7 @@ public class MamaFamaV1 : StrategyBase
     
     private async void PositionNotOpenAnymore(string id)
     {
+        _logger.Information("trade {Id} stop loss triggered", id);
         var trade = await _oandaApiConnection.TradeApi.GetTradeAsync(_accountId, id);
         if (trade.Trade.StopLossOrder.State is OrderState.TRIGGERED or OrderState.FILLED)
         {
@@ -136,7 +137,6 @@ public class MamaFamaV1 : StrategyBase
         {
             if (_tradeOpen && !_isLong)
             {
-                // state.Trade.Margin.ClosePosition(tradeId);
                 var pos = await _tradeManager.ClosePosition(_accountId, false);
                 _logger.Information("Fama crossed over Mama, closed short position, {Id}", _transactionId);
                 OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateClosePositionMessage(nameof(MamaFamaV1),pos, isLongPosition: false)));
@@ -148,7 +148,7 @@ public class MamaFamaV1 : StrategyBase
                 var pos = await _tradeManager.OpenLongPosition(_accountId, account.Balance * borrowAmount, adaptiveTs);
                 if (string.IsNullOrEmpty(pos.ErrorCode))
                 {
-                    _transactionId = pos.OrderCreateTransaction.BatchID.ToString();
+                    _transactionId = pos.OrderFillTransaction.TradeOpened.TradeID.ToString();
                     _tradeOpen = true;
                     _isLong = true;
                     _logger.Information("Fama crossed over Mama, opened long position, {Id}", _transactionId);
@@ -178,7 +178,7 @@ public class MamaFamaV1 : StrategyBase
                 if (string.IsNullOrEmpty(pos.ErrorCode))
                 {
                     _tradeOpen = true;
-                    _transactionId = pos.OrderCreateTransaction.BatchID.ToString();
+                    _transactionId = pos.OrderFillTransaction.TradeOpened.TradeID.ToString();
                     _isLong = false;
                     _logger.Information("Fama crossed under Mama, opened short position {Id}", _transactionId);
 

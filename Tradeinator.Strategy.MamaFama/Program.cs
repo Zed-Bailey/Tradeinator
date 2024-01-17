@@ -1,5 +1,8 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using GeriRemenyi.Oanda.V20.Client.Model;
+using GeriRemenyi.Oanda.V20.Sdk;
+using GeriRemenyi.Oanda.V20.Sdk.Common.Types;
 using Serilog;
 using Tradeinator.Shared;
 using Tradeinator.Shared.EventArgs;
@@ -29,6 +32,7 @@ if (string.IsNullOrEmpty(apiToken))
     Console.WriteLine("[ERROR] Oanda api token was null or empty");
     return;
 }
+
 
 
 // initialise serilog loggers for each strategy, writing to console and file
