@@ -4,7 +4,7 @@ using Tradeinator.Shared.Models;
 
 namespace Tradeinator.Strategy.Shared;
 
-public abstract class StrategyBase : IDisposable
+public abstract class StrategyBase : IAsyncDisposable
 {
 
     public event EventHandler<SystemMessageEventArgs>? SendMessageNotification;
@@ -26,8 +26,6 @@ public abstract class StrategyBase : IDisposable
 
     public abstract void NewBar(Bar bar);
     
-    
 
-    public abstract void Dispose();
-
+    public abstract ValueTask DisposeAsync();
 }
