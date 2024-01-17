@@ -6,8 +6,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Shared", "Trade
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Listener", "Tradeinator.Listener\Tradeinator.Listener.csproj", "{4EFF3DC8-F9F9-4EB0-A0DA-9D87D867729A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Strategy.MeanReversion", "Tradeinator.Strategy.MeanReversion\Tradeinator.Strategy.MeanReversion.csproj", "{BF0F204C-F073-476E-91CF-E35B0D430AA7}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Backtester", "Tradeinator.Backtester\Tradeinator.Backtester.csproj", "{9BBCA798-1C4E-4C7F-9F5E-FF01481CFF76}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Strategy.Shared", "Tradeinator.Strategy.Shared\Tradeinator.Strategy.Shared.csproj", "{BB2C97F6-2AF4-4121-B91F-4743FAA846B7}"
@@ -23,6 +21,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Dashboard", "Tradeinator.Dashboard\Tradeinator.Dashboard.csproj", "{4705BC30-A6B0-404B-B076-D9A9A9A6A2C2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleBacktestLib", "SimpleBacktestLib\SimpleBacktestLib\SimpleBacktestLib.csproj", "{C4D100EF-B505-4D57-8FB6-D3583454B1E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.DataIngestion.Forex", "Tradeinator.DataIngestion.Forex\Tradeinator.DataIngestion.Forex.csproj", "{0C81016D-3D08-4740-8FF7-8B3B86090D5C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Strategy.MamaFama", "Tradeinator.Strategy.MamaFama\Tradeinator.Strategy.MamaFama.csproj", "{0798D6DA-240D-4A57-A338-74689B95DB2D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,10 +44,6 @@ Global
 		{4EFF3DC8-F9F9-4EB0-A0DA-9D87D867729A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4EFF3DC8-F9F9-4EB0-A0DA-9D87D867729A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4EFF3DC8-F9F9-4EB0-A0DA-9D87D867729A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BF0F204C-F073-476E-91CF-E35B0D430AA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BF0F204C-F073-476E-91CF-E35B0D430AA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BF0F204C-F073-476E-91CF-E35B0D430AA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BF0F204C-F073-476E-91CF-E35B0D430AA7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9BBCA798-1C4E-4C7F-9F5E-FF01481CFF76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9BBCA798-1C4E-4C7F-9F5E-FF01481CFF76}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9BBCA798-1C4E-4C7F-9F5E-FF01481CFF76}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -78,5 +76,13 @@ Global
 		{C4D100EF-B505-4D57-8FB6-D3583454B1E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4D100EF-B505-4D57-8FB6-D3583454B1E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C4D100EF-B505-4D57-8FB6-D3583454B1E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C81016D-3D08-4740-8FF7-8B3B86090D5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C81016D-3D08-4740-8FF7-8B3B86090D5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C81016D-3D08-4740-8FF7-8B3B86090D5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C81016D-3D08-4740-8FF7-8B3B86090D5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0798D6DA-240D-4A57-A338-74689B95DB2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0798D6DA-240D-4A57-A338-74689B95DB2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0798D6DA-240D-4A57-A338-74689B95DB2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0798D6DA-240D-4A57-A338-74689B95DB2D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

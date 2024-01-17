@@ -12,6 +12,7 @@
       <PackageReference Include="CsvHelper" Version="30.0.1" />
       <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
       <PackageReference Include="OoplesFinance.StockIndicators" Version="1.0.53" />
 <!--      <PackageReference Include="SimpleBacktestLib" Version="2023.5.19.947" />-->
       <PackageReference Include="Spectre.Console" Version="0.48.0" />
@@ -20,7 +21,6 @@
     <ItemGroup>
       <ProjectReference Include="..\SimpleBacktestLib\SimpleBacktestLib\SimpleBacktestLib.csproj" />
       <ProjectReference Include="..\Tradeinator.Shared\Tradeinator.Shared.csproj" />
-      <ProjectReference Include="..\Tradeinator.Strategy.MeanReversion\Tradeinator.Strategy.MeanReversion.csproj" />
     </ItemGroup>
 
 </Project>

@@ -4,7 +4,7 @@ using Tradeinator.Shared;
 
 namespace Tradeinator.DataIngestion.Shared;
 
-public abstract class SubscriptionManager : IAsyncDisposable
+public abstract class AlpacaSubscriptionManager : IAsyncDisposable
 {
 
     /// <summary>
@@ -22,12 +22,11 @@ public abstract class SubscriptionManager : IAsyncDisposable
     /// </summary>
     public string SymbolsFile => Path.Combine(_fileSystemWatcher.Path, _fileSystemWatcher.Filter);
     
-    public SubscriptionManager(Logger logger, PublisherExchange exchange, string directoryPath, string symbolsFileName)
+    protected AlpacaSubscriptionManager(Logger logger, PublisherExchange exchange, string directoryPath, string symbolsFileName)
     {
         _subscriptions = new();
         
         _logger = logger;
-        _exchange = exchange;
         _exchange = exchange;
         
         
@@ -116,7 +115,6 @@ public abstract class SubscriptionManager : IAsyncDisposable
         
         newSubscription.Received += bar =>
         {
-            Console.WriteLine($"New {bar.Symbol} bar received");
             var msg = new
             {
                 bar.Open,

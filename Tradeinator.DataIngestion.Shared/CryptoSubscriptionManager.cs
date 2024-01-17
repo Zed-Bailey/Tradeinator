@@ -4,7 +4,7 @@ using Tradeinator.Shared;
 
 namespace Tradeinator.DataIngestion.Shared;
 
-public class CryptoSubscriptionManager : SubscriptionManager
+public class CryptoSubscriptionManager : AlpacaSubscriptionManager
 {
     private IAlpacaCryptoStreamingClient _client;
 

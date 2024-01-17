@@ -1,5 +1,6 @@
 using RabbitMQ.Client.Events;
 using Tradeinator.Shared;
+using Tradeinator.Shared.Extensions;
 
 namespace Tradeinator.Dashboard.Data;
 

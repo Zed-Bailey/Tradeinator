@@ -8,25 +8,25 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Tradeinator.Shared\Tradeinator.Shared.csproj" />
-      <ProjectReference Include="..\Tradeinator.Strategy.Shared\Tradeinator.Strategy.Shared.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Alpaca.Markets" Version="7.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
-      <PackageReference Include="OoplesFinance.StockIndicators" Version="1.0.53" />
-      <PackageReference Include="Serilog" Version="3.1.1" />
-      <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
-      <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
-    </ItemGroup>
-
-    <ItemGroup>
       <None Update="appsettings.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Tradeinator.DataIngestion.Shared\Tradeinator.DataIngestion.Shared.csproj" />
+      <ProjectReference Include="..\Tradeinator.Shared\Tradeinator.Shared.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="GeriRemenyi.Oanda.V20.Client" Version="0.0.3" />
+      <PackageReference Include="GeriRemenyi.Oanda.V20.Sdk" Version="0.0.6" />
+      <PackageReference Include="Serilog" Version="3.1.1" />
+      <PackageReference Include="Serilog.Sinks.Console" Version="5.0.0" />
+      <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
     </ItemGroup>
 
 </Project>
