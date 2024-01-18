@@ -48,7 +48,22 @@ var host = builder.Build();
 host.Services.UseScheduler(scheduler =>
 {
     scheduler.Schedule<PullDataInvocable>()
-        .EveryThirtyMinutes();
+        .EveryThirtyMinutes()
+        .When(() =>
+        {
+            var time = DateTime.UtcNow;
+            // market is not open on saturday
+            if (time.DayOfWeek is DayOfWeek.Saturday) return Task.FromResult(false);
+            
+            // market closes friday at 5pm ET or 10pm UTC
+            if(time.DayOfWeek is DayOfWeek.Friday && time.Hour >= 22) return Task.FromResult(false);
+            
+            // market opens on sunday at 5pm ET or 10pm UTC
+            if(time.DayOfWeek is DayOfWeek.Sunday && time.Hour >= 22) return Task.FromResult(true);
+            
+            
+            return Task.FromResult(true);
+        });
 });
 
 host.Run();
