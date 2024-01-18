@@ -33,8 +33,14 @@ if (string.IsNullOrEmpty(apiToken))
     return;
 }
 
+var exchangeHost = configLoader.Get("Rabbit:Host");
+var exchangeName = configLoader.Get("Rabbit:Exchange");
 
-
+if (string.IsNullOrEmpty(exchangeHost) || string.IsNullOrEmpty(exchangeName))
+{
+    Console.WriteLine("[ERROR] exchange host or name was null");
+    return;
+}
 // initialise serilog loggers for each strategy, writing to console and file
 
 await using var logger = new LoggerConfiguration()
@@ -53,29 +59,26 @@ Console.CancelKeyPress += (sender, eventArgs) =>
 
 // setup exchange
 using var exchange = new PublisherReceiverExchange(
-    configLoader.Get("rabbit:Host"), configLoader.Get("Rabbit:Name"),
+    exchangeHost, exchangeName,
     "AUD/CHF"
 );
 
 
 
-await using var strategy1 = new MamaFama(strategyVersion1, apiToken)
+await using var strategy1 = new MamaFama(strategyVersion1, apiToken, "MamaFamaV1")
 {
     UseSecondaryTrigger = false,
-    StrategyVersion = "MamaFamaV1"
 };
-await using var strategy2 = new MamaFama(strategyVersion2, apiToken)
+await using var strategy2 = new MamaFama(strategyVersion2, apiToken, "MamaFamaV2")
 {
     RrsiLevel = 50,
     UseSecondaryTrigger = true,
-    StrategyVersion = "MamaFamaV2"
 };
 
-await using var strategy3 = new MamaFama(strategyVersion3, apiToken)
+await using var strategy3 = new MamaFama(strategyVersion3, apiToken, "MamaFamaV3")
 {
     RrsiLevel = 45,
     UseSecondaryTrigger = true,
-    StrategyVersion = "MamaFamaV3"
 };
 
 
@@ -83,9 +86,11 @@ strategy1.SendMessageNotification += OnSendMessageNotification;
 strategy2.SendMessageNotification += OnSendMessageNotification;
 strategy3.SendMessageNotification += OnSendMessageNotification;
 
+logger.Information("Initialising strategies");
 await strategy1.Init();
 await strategy2.Init();
 await strategy3.Init();
+logger.Information("initialised");
 
 exchange.ConsumerOnReceive += (sender, eventArgs) =>
 {
@@ -101,6 +106,8 @@ exchange.ConsumerOnReceive += (sender, eventArgs) =>
     strategy3.NewBar(bar);
 };
 
+
+logger.Information("Exchange starting");
 await exchange.StartConsuming(tokenSource.Token);
 logger.Information("Exchange stopped");
 

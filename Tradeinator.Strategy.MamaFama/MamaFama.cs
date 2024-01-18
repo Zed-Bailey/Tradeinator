@@ -38,12 +38,15 @@ public class MamaFama : StrategyBase
     public string StrategyVersion { get; set; }
     //---------
     
-    public MamaFama(string accountId, string apiToken)
+    public MamaFama(string accountId, string apiToken, string strategyName)
     {
         _accountId = accountId;
         _apiToken = apiToken;
         _oandaApiConnection = new OandaApiConnection(OandaConnectionType.FxPractice, _apiToken);
         _tradeManager = new OandaTradeManager(_apiToken);
+        
+        StrategyVersion = strategyName;
+        
         _logger = new LoggerConfiguration()
             .WriteTo.Console()
             .WriteTo.File($"{StrategyVersion}.log")
