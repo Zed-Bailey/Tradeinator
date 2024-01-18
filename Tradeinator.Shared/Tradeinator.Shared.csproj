@@ -10,6 +10,10 @@
       <PackageReference Include="Alpaca.Markets" Version="7.0.0" />
       <PackageReference Include="OoplesFinance.StockIndicators" Version="1.0.53" />
       <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
+        
     </ItemGroup>
 
 </Project>

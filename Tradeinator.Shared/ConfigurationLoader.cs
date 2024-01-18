@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Configuration;
-using Tradeinator.Shared;
 
-namespace Tradeinator.Strategy.Shared;
+namespace Tradeinator.Shared;
 
 public class ConfigurationLoader
 {

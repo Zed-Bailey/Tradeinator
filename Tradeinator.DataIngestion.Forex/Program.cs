@@ -1,22 +1,13 @@
-﻿using Microsoft.Extensions.Configuration;
-using Serilog;
+﻿using Serilog;
 using Tradeinator.DataIngestion.Forex;
 using Tradeinator.DataIngestion.Shared;
 using Tradeinator.Shared;
 
+var config = new ConfigurationLoader(AppContext.BaseDirectory);
+config.LoadConfiguration();
 
-// load the dotenv file into the environment
-DotEnv.LoadEnvFiles(Path.Combine(AppContext.BaseDirectory, ".env"));
-
-// load the config
-var config = new ConfigurationBuilder()
-    .SetBasePath(AppContext.BaseDirectory)
-    .AddJsonFile("appsettings.json", true)
-    .AddEnvironmentVariables()
-    .Build();
-
-var host = config["Rabbit:Host"];
-var exchangeName = config["Rabbit:Exchange"];
+var host = config.Get("Rabbit:Host");
+var exchangeName = config.Get("Rabbit:Exchange");
 
 if (host is null || exchangeName is null)
 {
@@ -28,7 +19,7 @@ using var exchange = new PublisherExchange(host, exchangeName);
 // initialise serilog logger, writing to console and file
 await using var logger = new LoggerConfiguration()
     .WriteTo.Console()
-    // .WriteTo.File("data_ingestion.log")
+    .WriteTo.File("data_ingestion.log")
     .CreateLogger();
 
 
@@ -42,7 +33,7 @@ Console.CancelKeyPress += (sender, eventArgs) =>
     tokenSource.Cancel();
 };
 
-var apiToken = config["OANDA_API_TOKEN"];
+var apiToken = config.Get("OANDA_API_TOKEN") ?? throw new ArgumentException("Oanda api token was null or empty");
 var oandaConnection = new OandaConnection(apiToken);
 
 // timer runs every 30 minutes
