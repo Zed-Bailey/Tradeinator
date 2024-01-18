@@ -12,7 +12,7 @@ using Tradeinator.Strategy.MamaFama;
 using Tradeinator.Strategy.Shared;
 
 // load config
-var configLoader = new ConfigurationLoader(Directory.GetCurrentDirectory());
+var configLoader = new ConfigurationLoader(AppContext.BaseDirectory);
 configLoader.LoadConfiguration();
 
 var strategyVersion1 = configLoader.Get("Accounts:SV1");

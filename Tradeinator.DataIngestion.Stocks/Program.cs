@@ -5,11 +5,11 @@ using Tradeinator.DataIngestion.Shared;
 using Tradeinator.Shared;
 
 // load the dotenv file into the environment
-DotEnv.LoadEnvFiles(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
+DotEnv.LoadEnvFiles(Path.Combine(AppContext.BaseDirectory, ".env"));
 
 // load the config
 var config = new ConfigurationBuilder()
-    .SetBasePath(Directory.GetCurrentDirectory())
+    .SetBasePath(AppContext.BaseDirectory)
     .AddJsonFile("appsettings.json", true)
     .AddEnvironmentVariables()
     .Build();
