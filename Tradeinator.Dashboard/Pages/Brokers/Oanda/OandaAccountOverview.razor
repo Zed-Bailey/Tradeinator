@@ -18,6 +18,71 @@
 }
 
 
+@if (!isLoading)
+{
+    <FluentGrid>
+        <FluentGridItem sm="3">
+            <div class="border border-1 border-dark p-2 rounded-3">
+                <FluentLabel Typo="Typography.H4" Class="fw-bold">P/L</FluentLabel>
+                <FluentLabel Typo="Typography.H2" Color="@(_account?.Pl > 0 ? Color.Success : Color.Warning)">@(_account?.Pl.ToString("C2"))</FluentLabel>    
+            </div>
+            
+        </FluentGridItem>
+        <FluentGridItem sm="6">
+            @(_trades.Trades.Count)
+            @(_account.Positions.Count)
+            @(_account.Trades.Count)
+        </FluentGridItem>
+        
+        
+        <FluentGridItem sm="12">
+            <FluentLabel Typo="Typography.PaneHeader">Open Trades</FluentLabel>
+            <FluentDataGrid Items="@(_trades?.Trades.AsQueryable())">
+
+                <PropertyColumn Title="Id" Property="@(t => t.Id)" Sortable="true"></PropertyColumn>
+                <PropertyColumn Title="Opened" Property="@(t => t.OpenTime)" Sortable="true"></PropertyColumn>
+                <PropertyColumn Title="Instrument" Property="@(t => t.Instrument)"></PropertyColumn>
+                <PropertyColumn Title="Price" Property="@(t => t.Price)"></PropertyColumn>
+                <PropertyColumn Title="Units" Property="@(t => Math.Abs(t.InitialUnits))"></PropertyColumn>
+                <PropertyColumn Title="Direction" Property="@(t => t.InitialUnits < 0 ? "Short" : "Long")"></PropertyColumn>
+                <PropertyColumn Title="Trade State" Property="@(t => t.State)"></PropertyColumn>
+                <PropertyColumn Title="Realized P/L" Property="@(t => t.RealizedPL)" Sortable="true"></PropertyColumn>
+                <PropertyColumn Title="Unrealized P/L" Property="@(t => t.UnrealizedPL)"></PropertyColumn>
+            </FluentDataGrid>
+        </FluentGridItem>
+        
+        <FluentGridItem sm="12">
+            <FluentLabel Typo="Typography.PaneHeader">Positions</FluentLabel>
+            <FluentDataGrid Items="@(_account?.Positions.AsQueryable())">
+                <PropertyColumn Title="Instrument" Property="@(t => t.Instrument)"></PropertyColumn>
+                <PropertyColumn Title="P/L" Property="@(t => t.Pl)"></PropertyColumn>
+                @* <PropertyColumn Title="Units" Property="@(t => Math.Abs(t.InitialUnits))"></PropertyColumn> *@
+                @* <PropertyColumn Title="Direction" Property="@(t => t.InitialUnits < 0 ? "Short" : "Long")"></PropertyColumn> *@
+                @* <PropertyColumn Title="Trade State" Property="@(t => t.State)"></PropertyColumn> *@
+                @* <PropertyColumn Title="Realized P/L" Property="@(t => t.RealizedPL)" Sortable="true"></PropertyColumn> *@
+                @* <PropertyColumn Title="Unrealized P/L" Property="@(t => t.UnrealizedPL)"></PropertyColumn> *@
+            </FluentDataGrid>
+        </FluentGridItem>
+        
+        <FluentGridItem sm="12">
+            <FluentLabel Typo="Typography.PaneHeader">Transactions</FluentLabel>
+            <FluentDataGrid Items="@(_transactions?.Pages.AsQueryable())">
+                <PropertyColumn Title="Instrument" Property="@(t => t)"></PropertyColumn>
+                @* <PropertyColumn Title="P/L" Property="@(t => t.Pl)"></PropertyColumn> *@
+                @* <PropertyColumn Title="Units" Property="@(t => Math.Abs(t.InitialUnits))"></PropertyColumn> *@
+                @* <PropertyColumn Title="Direction" Property="@(t => t.InitialUnits < 0 ? "Short" : "Long")"></PropertyColumn> *@
+                @* <PropertyColumn Title="Trade State" Property="@(t => t.State)"></PropertyColumn> *@
+                @* <PropertyColumn Title="Realized P/L" Property="@(t => t.RealizedPL)" Sortable="true"></PropertyColumn> *@
+                @* <PropertyColumn Title="Unrealized P/L" Property="@(t => t.UnrealizedPL)"></PropertyColumn> *@
+            </FluentDataGrid>
+        </FluentGridItem>
+        
+    </FluentGrid>
+    
+    
+    
+    
+}
 
 
 @code {
@@ -28,26 +93,25 @@
     bool tradesLoading = true;
     
     IOandaApiConnection? connection;
-    AccountSummaryResponse? accountSummary;
+    Account? _account;
+    TradesResponse? _trades;
+    TransactionsResponse? _transactions;
     
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
+        
         var token = Config["OANDA_API_TOKEN"];
        
         var server = OandaConnectionType.FxPractice;
         connection = new OandaApiConnectionFactory().CreateConnection(server, token);
         
-        accountSummary = await connection.AccountApi.GetAccountSummaryAsync(AccountId);
-
-        LoadTrades();
+        _account = await connection.GetAccount(AccountId).GetDetailsAsync();
+        _trades = await connection.TradeApi.GetTradesAsync(AccountId);
+        _transactions = await connection.TransactionApi.GetTransactionsAsync(AccountId);
+        
         //
         isLoading = false;
-        await base.OnInitializedAsync();
-    }
-
-    async void LoadTrades()
-    {
-        // var res = await connection.TransactionApi.GetTransactionsAsync(AccountId);
         
     }
     

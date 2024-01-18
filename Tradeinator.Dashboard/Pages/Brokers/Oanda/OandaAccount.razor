@@ -24,11 +24,18 @@
 { 
     <FluentButton IconStart="@(new Icons.Filled.Size24.ArrowDownload())" Appearance="Appearance.Stealth">Refresh Accounts</FluentButton>
     
- 
+    <FluentDivider Orientation="Orientation.Horizontal"/>
+    <div class="my-2">
+        <FluentLabel Typo="Typography.Subject">Total P/L : $ @(accountSummaries.Sum(x => x.Pl))</FluentLabel>
+        <FluentLabel Typo="Typography.Subject">Total Commission : $ @(accountSummaries.Sum(x => x.Commission))</FluentLabel>
+    </div>
+    
+    
+    <FluentDivider Orientation="Orientation.Horizontal"/>
+    
     <FluentGrid Class="mt-3">
-        @foreach (var a in accountSummaries)
+        @foreach (var acc in accountSummaries)
         {
-            var acc = a.Account;
             
             <FluentGridItem sm="12" md="6" xl="3">
                 <FluentCard >
@@ -43,6 +50,8 @@
                 
             </FluentGridItem>
         }
+        
+        
     </FluentGrid>
 }
 
@@ -53,31 +62,46 @@
     IOandaApiConnection? connection;
 
     IEnumerable<AccountProperties> currentAccounts = new List<AccountProperties>();
-    List<AccountSummaryResponse> accountSummaries = new();
+    List<AccountSummary> accountSummaries = new();
     
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
+        
         var token = Config["OANDA_API_TOKEN"];
         if (string.IsNullOrEmpty(token))
         {
             await dialogService.ShowErrorAsync("Oanda api token was not found in configuration", "Token Error");
             isError = true;
+            
+        }
+        else
+        {
+            connection = new OandaApiConnection(OandaConnectionType.FxPractice, token);
+            
+            var c = connection.GetAccounts().OrderBy(x => x.Id);
+            foreach (var a in c)
+            {
+                try
+                {
+                    var summary = await connection.GetAccount(a.Id).GetSummaryAsync();
+                    accountSummaries.Add(summary);
+                }
+                catch (ApiException e)
+                {
+                    Console.WriteLine(e);
+                    Console.WriteLine($"failed to get summary for account: {a.Id}");
+                }
+                    
+            }
         }
         
-        var server = OandaConnectionType.FxPractice;
-        connection = new OandaApiConnectionFactory().CreateConnection(server, token);
-
-        currentAccounts = connection.GetAccounts();
-
-        foreach (var id in currentAccounts)
-        {
-            var summary = await connection.AccountApi.GetAccountSummaryAsync(id.Id);
-            accountSummaries.Add(summary);
-        }
+        
         
         //
         isLoading = false;
-        await base.OnInitializedAsync();
+        
     }
+    
 
 }
