@@ -27,6 +27,12 @@ using the [.net file system watcher](https://learn.microsoft.com/en-us/dotnet/ap
 the `symbols.txt` file in the stocks/crypto `DataIngestion` project is watched.
 The system has a file watcher registered to this file, when the file changes symbol subscriptions are added or removed
 
+## Improvements
+- strategy init message
+- change console programs to worker services?
+- add systemd service files to each project that can be easily copied
+- solution level config file
+- 
 
 ## Tradeinator.Listener
 Provides a simple example of registering to an topic and consuming data
