@@ -59,9 +59,24 @@ using var exchange = new PublisherReceiverExchange(
 
 
 
-await using var strategy1 = new MamaFamaV1(strategyVersion1, apiToken);
-await using var strategy2 = new MamaFamaV2(strategyVersion2, apiToken);
-await using var strategy3 = new MamaFamaV3(strategyVersion3, apiToken);
+await using var strategy1 = new MamaFama(strategyVersion1, apiToken)
+{
+    UseSecondaryTrigger = false,
+    StrategyVersion = "MamaFamaV1"
+};
+await using var strategy2 = new MamaFama(strategyVersion2, apiToken)
+{
+    RrsiLevel = 50,
+    UseSecondaryTrigger = true,
+    StrategyVersion = "MamaFamaV2"
+};
+
+await using var strategy3 = new MamaFama(strategyVersion3, apiToken)
+{
+    RrsiLevel = 45,
+    UseSecondaryTrigger = true,
+    StrategyVersion = "MamaFamaV3"
+};
 
 
 strategy1.SendMessageNotification += OnSendMessageNotification;
@@ -70,6 +85,7 @@ strategy3.SendMessageNotification += OnSendMessageNotification;
 
 await strategy1.Init();
 await strategy2.Init();
+await strategy3.Init();
 
 exchange.ConsumerOnReceive += (sender, eventArgs) =>
 {
