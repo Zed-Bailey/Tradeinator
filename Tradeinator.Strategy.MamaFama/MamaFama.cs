@@ -96,6 +96,31 @@ public class MamaFama : StrategyBase
 
     public override async void NewBar(Bar bar)
     {
+        try
+        {
+            await Execute(bar);
+        }
+        catch (Exception e)
+        {
+            var msg = new SystemMessage
+            {
+                StrategyName = StrategyVersion,
+                Priority = MessagePriority.Critical,
+                Symbol = "AUD/CHF",
+                Message =
+                    $"An error occured while trying to execute the strategy\n{e.Message}\nsee log for full exception"
+            };
+            
+            _logger.Fatal(e, "An exception occured while trying to run the strategy");
+            OnSendMessage(new SystemMessageEventArgs(msg));
+        }
+        
+    }
+
+    
+    
+    private async Task Execute (Bar bar)
+    {
         _data.Add(bar.ToTickerData());
         if(_data.Count < 200) return;
         
