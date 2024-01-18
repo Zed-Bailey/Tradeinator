@@ -26,16 +26,19 @@ public class OandaConnection
         // converts AUD/CHF => AUD_CHF which matches enum naming so it can be parsed
         var cleaned = symbol.Replace("/", "_");
         if (!Enum.TryParse<InstrumentName>(cleaned, out var iName)) return null;
-        
-        var candle = await _connection.InstrumentApi.GetInstrumentCandlesAsync(
-            iName,
-            DateTimeFormat.RFC3339,
-            smooth: true,
-            granularity: CandlestickGranularity.M30,
-            from: DateTime.Now.AddHours(-2).ToOandaDateTime(DateTimeFormat.RFC3339)
-        );
 
-        var latest = candle?.Candles.Last();
+        var  candle = await _connection.GetInstrument(iName)
+            .GetLastNCandlesAsync(CandlestickGranularity.M30, 1);
+        
+        // var candle = await _connection.InstrumentApi.GetInstrumentCandlesAsync(
+        //     iName,
+        //     DateTimeFormat.RFC3339,
+        //     smooth: true,
+        //     granularity: CandlestickGranularity.M30,
+        //     from: DateTime.Now.AddHours(-2).ToOandaDateTime(DateTimeFormat.RFC3339)
+        // );
+
+        var latest = candle.LastOrDefault();
         if (latest is null) return null;
         
         return new Bar()

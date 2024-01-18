@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Worker">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -22,6 +22,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Coravel" Version="5.0.2" />
       <PackageReference Include="GeriRemenyi.Oanda.V20.Client" Version="0.0.3" />
       <PackageReference Include="GeriRemenyi.Oanda.V20.Sdk" Version="0.0.6" />
       <PackageReference Include="Serilog" Version="3.1.1" />
@@ -30,6 +31,7 @@
       <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
     </ItemGroup>
 
 </Project>
