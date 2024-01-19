@@ -1,6 +1,36 @@
 import os
 import subprocess
 
+systemd_file_location = "/lib/systemd/system/"
+
+
+
+# ========================================
+# Update me with the projects you want to deploy
+# ========================================
+projects = [
+    "Tradeinator.DataIngestion.Forex",
+    "Tradeinator.Notifications",
+    "Tradeinator.Strategy.MamaFama",
+]
+# ========================================
+
+
+print(f"building the following projects:\n" + '\n'.join(projects))
+continue_building = input("Continue [y/n]: ")
+if continue_building != "y":
+    print("exiting")
+    exit(0)
+
+if not os.environ.get("SUDO_UID"):
+    print(f"[ERROR] this script requires being run with sudo permissions as it writes systemd service files to {systemd_file_location}")
+    exit(1)
+
+
+
+
+
+
 def build_project():
     return subprocess.run(["dotnet", "publish", "-c", "Release", "-o", "../build"], capture_output=True)
     
@@ -22,7 +52,7 @@ def get_unit_file(description, dotnet_path, build_dll_path):
     """
 
 
-which_dotnet = subprocess.run(["which", "dotnet"], capture_output=True)
+which_dotnet = subprocess.run(["/usr/bin/which", "dotnet"], capture_output=True)
 if which_dotnet.returncode == 1:
     print("[ERROR] 'which dotnet' failed which means you dont have .net installed on your system")
     exit(1)
@@ -42,15 +72,7 @@ build_dir = curr_dir + '/build'
 os.makedirs(build_dir, exist_ok=True)
 print(f"Build will be output to: {curr_dir + '/build'}")
 
-# ========================================
-# Update me with the projects you want to deploy
-# ========================================
-projects = [
-    "Tradeinator.DataIngestion.Forex",
-    "Tradeinator.Notifications",
-    "Tradeinator.Strategy.MamaFama",
-]
-# ========================================
+
 
 
 for project in projects:
@@ -68,7 +90,6 @@ for project in projects:
     os.chdir("..")
 
 
-systemd_file_location = "/lib/systemd/system/"
 
 if not os.path.exists(systemd_file_location):
     print(f"[ERROR] systemd path service path does not exist : {systemd_file_location}")
