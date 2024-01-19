@@ -22,11 +22,6 @@ if continue_building != "y":
     print("exiting")
     exit(0)
 
-if not os.environ.get("SUDO_UID"):
-    print(f"[ERROR] this script requires being run with sudo permissions as it writes systemd service files to {systemd_file_location}")
-    exit(1)
-
-
 
 
 
@@ -97,15 +92,27 @@ if not os.path.exists(systemd_file_location):
 
 unit_files = []
 
+service_file_dir = curr_dir + '/service_files'
+os.makedirs(service_file_dir, exist_ok=True)
 
 for project in projects:
     unit_file = get_unit_file(project, dotnet_path, f"{build_dir}/{project}.dll")
     unit_file_name = project.lower().replace('.', '-') + ".service"
     unit_files.append(unit_file_name)
-    f = open(f"{systemd_file_location}{unit_file_name}", 'w')
+    f = open(f"{service_file_dir}/{unit_file_name}", 'w')
     f.write(unit_file)
     f.close()
-    print(f"wrote systemd service file to: {systemd_file_location}{unit_file_name}")
+    print(f"created systemd service file {unit_file_name}")
+
+print(f"wrote all service files to {service_file_dir}")
+
+print("run the following command to copy all service files to systemd services directory")
+print(f"sudo cp -r {service_file_dir}/. {systemd_file_location}")
+
+print("reload daemon (required):\nsudo systemctl daemon-reload")
+
+print("#################")
+
 
 
 print("services already running? run:")
@@ -114,7 +121,6 @@ for file in unit_files:
 
 print("#################")
 
-print("reload daemon (required):\nsudo systemctl daemon-reload")
 
 print("enable services (to start on boot):")
 for file in unit_files:
