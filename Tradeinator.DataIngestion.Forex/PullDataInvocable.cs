@@ -19,10 +19,33 @@ public class PullDataInvocable : IInvocable
         _logger = logger;
         _oandaConnection = oandaConnection;
     }
+
+    /// <summary>
+    /// Checks whether the market is open or not
+    /// </summary>
+    /// <returns>true when market is open, false otherwise</returns>
+    private bool CheckTime()
+    {
+        var time = DateTime.UtcNow;
+        // market is not open on saturday
+        if (time.DayOfWeek is DayOfWeek.Saturday) return false;
+            
+        // market closes friday at 5pm ET or 10pm UTC
+        if (time.DayOfWeek is DayOfWeek.Friday && time.Hour >= 22) return false;
+            
+        // market opens on sunday at 5pm ET or 10pm UTC
+        if(time.DayOfWeek is DayOfWeek.Sunday && time.Hour >= 22) return true;
+            
+            
+        return true;
+    }
     
     
     public async Task Invoke()
     {
+        if (!CheckTime())
+            return;
+        
         foreach (var symbol in _subscriptionManager.Symbols)
         { 
             var bar = await _oandaConnection.GetLatestData(symbol);

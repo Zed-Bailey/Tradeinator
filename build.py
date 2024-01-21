@@ -111,7 +111,7 @@ print(f"sudo cp -r {service_file_dir}/. {systemd_file_location}")
 
 print("reload daemon (required):\nsudo systemctl daemon-reload")
 
-print("#################")
+print("\n#################\n")
 
 
 
@@ -119,7 +119,7 @@ print("services already running? run:")
 for file in unit_files:
     print(f"sudo systemctl disable {file}")
 
-print("#################")
+print("\n#################\n")
 
 
 print("enable services (to start on boot):")
@@ -127,14 +127,12 @@ for file in unit_files:
     print(f"sudo systemctl enable {file}")
 print("sudo reboot")
 
-print("#################")
+print("\n#################\n")
 
 print("to start services now (does not enable them to start on boot):")
 for file in unit_files:
     print(f"sudo systemctl start {file}")
 
-
-print("#################")
 
 
 

@@ -31,7 +31,7 @@ The system has a file watcher registered to this file, when the file changes sym
 - strategy init message
 - change console programs to worker services?
 - add systemd service files to each project that can be easily copied
-- solution level config file
+- solution level config file or a project that contains the config files and a class to load them
 - 
 
 ## Tradeinator.Listener
