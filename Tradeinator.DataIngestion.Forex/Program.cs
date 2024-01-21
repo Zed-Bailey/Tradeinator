@@ -1,79 +1,59 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Coravel;
 using Serilog;
 using Tradeinator.DataIngestion.Forex;
 using Tradeinator.DataIngestion.Shared;
 using Tradeinator.Shared;
 
+var config = new ConfigurationLoader(AppContext.BaseDirectory);
+config.LoadConfiguration();
 
-// load the dotenv file into the environment
-DotEnv.LoadEnvFiles(Path.Combine(AppContext.BaseDirectory, ".env"));
+var exchangeHost = config.Get("Rabbit:Host");
+var exchangeName = config.Get("Rabbit:Exchange");
 
-// load the config
-var config = new ConfigurationBuilder()
-    .SetBasePath(AppContext.BaseDirectory)
-    .AddJsonFile("appsettings.json", true)
-    .AddEnvironmentVariables()
-    .Build();
-
-var host = config["Rabbit:Host"];
-var exchangeName = config["Rabbit:Exchange"];
-
-if (host is null || exchangeName is null)
+if (exchangeHost is null || exchangeName is null)
 {
-    throw new ArgumentNullException(host ?? exchangeName);
+    throw new ArgumentNullException(exchangeHost ?? exchangeName);
 }
 
-using var exchange = new PublisherExchange(host, exchangeName);
+using var exchange = new PublisherExchange(exchangeHost, exchangeName);
 
 // initialise serilog logger, writing to console and file
 await using var logger = new LoggerConfiguration()
     .WriteTo.Console()
-    // .WriteTo.File("data_ingestion.log")
+    .WriteTo.File("data_ingestion.log")
     .CreateLogger();
 
 
 
 //
-var subscriptionManager = new ForexSubscriptionManager(logger, AppContext.BaseDirectory, "symbols.txt");
-var tokenSource = new CancellationTokenSource();
-Console.CancelKeyPress += (sender, eventArgs) =>
-{
-    logger.Information("Ctrl+C pressed shutting down");
-    tokenSource.Cancel();
-};
+var subscriptionManager = new ForexSubscriptionManager(logger, Directory.GetCurrentDirectory(), "symbols.txt");
 
-var apiToken = config["OANDA_API_TOKEN"];
+var apiToken = config.Get("OANDA_API_TOKEN") ?? throw new ArgumentException("Oanda api token was null or empty");
 var oandaConnection = new OandaConnection(apiToken);
 
-// timer runs every 30 minutes
-await using var timer = new Timer(TimerTrigger, null, TimeSpan.Zero, new TimeSpan(0,30, 0));
+var builder = Host.CreateApplicationBuilder(args);
 
+// add services for worker
+builder.Services.AddSingleton(subscriptionManager);
+builder.Services.AddSingleton(exchange);
+builder.Services.AddSingleton(logger);
+builder.Services.AddSingleton(oandaConnection);
 
-await Task.Delay(-1, tokenSource.Token);
+builder.Services.AddTransient<PullDataInvocable>();
 
+builder.Services.AddScheduler();
 
-return;
+var host = builder.Build();
 
-async void TimerTrigger(object? state)
+host.Services.UseScheduler(scheduler =>
 {
+    scheduler
+        .Schedule<PullDataInvocable>()
+        .EveryThirtyMinutes();
 
-    foreach (var symbol in subscriptionManager.Symbols)
-    { 
-        var bar = await oandaConnection.GetLatestData("AUD_CHF");
-        if (bar is null)
-        {
-            logger.Warning("Received bar for {Symbol} was null", symbol);
-            continue;
-        }
-        
-        // post bar to exchange
-        exchange.Publish(bar, $"bar.{symbol}");
-        logger.Information("Received bar for {Symbol} | {Date} | {O} {H} {L} {C}", 
-            symbol, bar.TimeUtc, bar.Open, bar.High, bar.Low, bar.Close
-        );
-        
-    }
-   
-}
+});
 
+host.Run();
+
+logger.Information("Shutting down");
 

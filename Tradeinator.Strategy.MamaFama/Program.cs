@@ -106,6 +106,14 @@ exchange.ConsumerOnReceive += (sender, eventArgs) =>
     strategy3.NewBar(bar);
 };
 
+exchange.Publish(new SystemMessageEventArgs(new SystemMessage()
+{
+    Message = "Initialised MamaFama strategy",
+    Priority = MessagePriority.Information,
+    StrategyName = "MamaFama",
+    Symbol = "AUD/CHF"
+}), "notifications.AUD/CHF");
+
 
 logger.Information("Exchange starting");
 await exchange.StartConsuming(tokenSource.Token);

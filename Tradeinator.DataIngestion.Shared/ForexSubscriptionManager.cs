@@ -11,12 +11,12 @@ public class ForexSubscriptionManager
     
     private FileSystemWatcher _fileSystemWatcher;
     private Logger _logger;
-    
+    private string _directoryPath;
     public ForexSubscriptionManager(Logger logger, string directoryPath, string symbolsFileName)
     {
         
         _logger = logger;
-        
+        _directoryPath = directoryPath;
         
         _fileSystemWatcher = new FileSystemWatcher(directoryPath);
         _fileSystemWatcher.Filter = symbolsFileName;
@@ -31,7 +31,7 @@ public class ForexSubscriptionManager
     private void OnSymbolsFileChanged(object sender, FileSystemEventArgs eventArgs)
     {
         if (eventArgs.ChangeType != WatcherChangeTypes.Changed) return;
-        var text = File.ReadAllLines(Path.Combine(Directory.GetCurrentDirectory(), "symbols.txt"));
+        var text = File.ReadAllLines(Path.Combine(_directoryPath, "symbols.txt"));
     
         _logger.Information("Symbols file changed {Path} | {Event}", eventArgs.FullPath, eventArgs.ChangeType);
     
@@ -49,7 +49,7 @@ public class ForexSubscriptionManager
     
         // loop through the subscripts and check the keys, if the key doesn't exist then the the 
         // streaming subscription is unsubscribed
-        foreach (var key in _watchedSymbols)
+        foreach (var key in _watchedSymbols.ToArray())
         {
             if (text.Contains(key)) continue;
             
