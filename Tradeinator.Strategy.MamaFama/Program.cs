@@ -60,7 +60,7 @@ Console.CancelKeyPress += (sender, eventArgs) =>
 // setup exchange
 using var exchange = new PublisherReceiverExchange(
     exchangeHost, exchangeName,
-    "AUD/CHF"
+    "bar.AUD/CHF"
 );
 
 
@@ -95,6 +95,7 @@ logger.Information("initialised");
 exchange.ConsumerOnReceive += (sender, eventArgs) =>
 {
     var bar = eventArgs.DeserializeToModel<Bar>();
+    logger.Information("received new bar {Bar}", bar);
     if (bar == null)
     {
         logger.Warning("Received bar was null after deserialization. body: {Body} | topic binding: {Binding}", eventArgs.BodyAsString(), eventArgs.RoutingKey);
