@@ -85,6 +85,7 @@ public class MamaFama : StrategyBase
 
             _data.Add(t);
         }
+        _logger.Information("loaded {Num} candles", _data.Count);
     }
     
     private async void PositionNotOpenAnymore(string id)
@@ -99,6 +100,7 @@ public class MamaFama : StrategyBase
 
     public override async void NewBar(Bar bar)
     {
+        _logger.Information("New bar: {Bar}", bar);
         try
         {
             await Execute(bar);
