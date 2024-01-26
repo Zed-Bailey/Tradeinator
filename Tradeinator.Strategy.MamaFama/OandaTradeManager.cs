@@ -52,7 +52,7 @@ public class OandaTradeManager
         var orderRequest = new CreateOrderRequest(new
         {
             Instrument = order.Instrument,
-            Units = order.Units.ToString(),
+            Units = double.Floor(order.Units).ToString(),
             StopLossOnFill = new
             {
                 // has to be a string other will get the STOP_LOSS_ON_FILL_PRICE_PRECISION_EXCEEDED error
@@ -78,7 +78,7 @@ public class OandaTradeManager
         var orderRequest = new CreateOrderRequest(new
         {
             Instrument = order.Instrument,
-            Units = order.Units.ToString(),
+            Units = double.Floor(order.Units).ToString(),
             StopLossOnFill = new
             {
                 // has to be a string other will get the STOP_LOSS_ON_FILL_PRICE_PRECISION_EXCEEDED error
