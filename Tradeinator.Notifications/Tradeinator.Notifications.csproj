@@ -18,6 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Tradeinator.Configuration\Tradeinator.Configuration.csproj" />
       <ProjectReference Include="..\Tradeinator.Shared\Tradeinator.Shared.csproj" />
     </ItemGroup>
 

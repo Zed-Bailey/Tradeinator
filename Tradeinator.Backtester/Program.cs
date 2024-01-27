@@ -8,6 +8,7 @@ using SimpleBacktestLib;
 using SimpleBacktestLib.Models;
 using Spectre.Console;
 using Tradeinator.Backtester.Helpers;
+using Tradeinator.Configuration;
 using Tradeinator.Shared;
 
 // default symbol strategies are executed on
@@ -27,14 +28,7 @@ Console.CancelKeyPress += (sender, eventArgs) => AnsiConsole.WriteLine();
 
 var stopwatch = new Stopwatch();
 
-DotEnv.LoadEnvFiles(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
-
-// load the config
-var config = new ConfigurationBuilder()
-    .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json", true)
-    .AddEnvironmentVariables()
-    .Build();
+var config = new ConfigurationLoader();
 
 var key = config["ALPACA_KEY"];
 var secret = config["ALPACA_SECRET"];

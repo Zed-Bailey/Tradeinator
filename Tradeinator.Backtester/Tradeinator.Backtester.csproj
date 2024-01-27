@@ -20,6 +20,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\SimpleBacktestLib\SimpleBacktestLib\SimpleBacktestLib.csproj" />
+      <ProjectReference Include="..\Tradeinator.Configuration\Tradeinator.Configuration.csproj" />
       <ProjectReference Include="..\Tradeinator.Shared\Tradeinator.Shared.csproj" />
     </ItemGroup>
 
