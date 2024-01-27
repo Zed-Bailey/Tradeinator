@@ -1,4 +1,4 @@
-namespace Tradeinator.Shared;
+namespace Tradeinator.Configuration;
 
 public class DotEnv
 {
