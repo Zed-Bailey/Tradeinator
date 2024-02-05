@@ -21,10 +21,10 @@ public class StrategyLoader
     }
     
     /// <summary>
-    /// 
+    /// Initialises a strategy of type T and populates it's properties based on the json config
     /// </summary>
-    /// <param name="json"></param>
-    /// <typeparam name="T"></typeparam>
+    /// <param name="json">The json config</param>
+    /// <typeparam name="T">The type</typeparam>
     /// <exception cref="NoMatchingProperty">thrown when no property was found matching the serialised properties PropertyName value</exception>
     /// <returns>The deserialised strategy</returns>
     public T LoadStrategy<T>(string json) where T : new()
@@ -70,6 +70,7 @@ public class StrategyLoader
         var serialisedProperties = new List<SerialisedProperty>();
         foreach (var propertyInfo in props)
         {
+            // get attribute applied to property
             var attribute = (SerialisableParameter?) Attribute.GetCustomAttribute(propertyInfo, typeof(SerialisableParameter));
             
             // no attribute applied to this property
@@ -82,7 +83,7 @@ public class StrategyLoader
             
         }
 
-        string serialised = JsonSerializer.Serialize(serialisedProperties);
-        return serialised;
+        
+        return JsonSerializer.Serialize(serialisedProperties); 
     }
 }

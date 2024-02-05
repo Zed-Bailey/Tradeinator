@@ -15,10 +15,10 @@ public class SerialisedStrategy
 /// <summary>
 /// 
 /// </summary>
-/// <param name="Name">Descriptive name</param>
+/// <param name="DescriptiveName">Descriptive name</param>
 /// <param name="PropertyName">The actual property name</param>
 /// <param name="Value">the value</param>
 /// <param name="Type">the simple type of property will be int, number, string or bool</param>
 public record SerialisedProperty(
-    string Name, string PropertyName, object Value, string Type
+    string DescriptiveName, string PropertyName, object Value, string Type
 );
