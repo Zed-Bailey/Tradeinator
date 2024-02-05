@@ -1,16 +1,11 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-using GeriRemenyi.Oanda.V20.Client.Model;
-using GeriRemenyi.Oanda.V20.Sdk;
-using GeriRemenyi.Oanda.V20.Sdk.Common.Types;
-using Serilog;
+﻿using Serilog;
 using Tradeinator.Configuration;
 using Tradeinator.Shared;
 using Tradeinator.Shared.EventArgs;
 using Tradeinator.Shared.Extensions;
 using Tradeinator.Shared.Models;
 using Tradeinator.Strategy.MamaFama;
-using Tradeinator.Strategy.Shared;
+
 
 // load config
 var configLoader = new ConfigurationLoader();
@@ -21,13 +16,13 @@ var strategyVersion3 = configLoader.Get("MamaFama:Accounts:SV3");
 var apiToken = configLoader.Get("OANDA_API_TOKEN");
 
 
-if (string.IsNullOrEmpty(strategyVersion1) || string.IsNullOrEmpty(strategyVersion2) || string.IsNullOrEmpty(strategyVersion3))
+if (ValidateNotNull(strategyVersion1, strategyVersion2, strategyVersion3))
 {
     Console.WriteLine("[ERROR] empty account number(s)");
     return;
 }
 
-if (string.IsNullOrEmpty(apiToken))
+if (ValidateNotNull(apiToken))
 {
     Console.WriteLine("[ERROR] Oanda api token was null or empty");
     return;
@@ -107,15 +102,6 @@ exchange.ConsumerOnReceive += (sender, eventArgs) =>
     strategy3.NewBar(bar);
 };
 
-exchange.Publish(new SystemMessageEventArgs(new SystemMessage()
-{
-    Message = "Initialised MamaFama strategy",
-    Priority = MessagePriority.Information,
-    StrategyName = "MamaFama",
-    Symbol = "AUD/CHF"
-}), "notifications.AUD/CHF");
-
-
 logger.Information("Exchange starting");
 await exchange.StartConsuming(tokenSource.Token);
 logger.Information("Exchange stopped");
@@ -130,3 +116,5 @@ void OnSendMessageNotification(object? sender, SystemMessageEventArgs e)
     var message = e.Message;
     exchange.Publish(message, $"notification.{message.Symbol}");
 }
+
+bool ValidateNotNull(params string?[] values) => values.Any(string.IsNullOrEmpty);
