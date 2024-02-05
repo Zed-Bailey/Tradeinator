@@ -7,8 +7,8 @@ namespace Tradeinator.Strategy.Test;
 public class ExampleStrategy: StrategyBase
 {
 
-    [SerialisableParameter("Type", 10)]
-    public int Type { get; set; }
+    [SerialisableParameter("SomeValue")]
+    public int SomeValue { get; set; } = 10;
 
     public int NoSerialisationAttribute { get; set; }
     
