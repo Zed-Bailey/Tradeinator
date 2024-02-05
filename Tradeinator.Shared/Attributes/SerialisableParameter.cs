@@ -5,12 +5,12 @@ public class SerialisableParameter: Attribute
 {
 
     public object Value { get; set; }
-    public string SerialsedName { get; set; }
+    public string DescriptiveName { get; set; }
     
     
     public SerialisableParameter(string name, object value)
     {
-        SerialsedName = name;
+        DescriptiveName = name;
         Value = value;
     }
 }

@@ -1,4 +1,6 @@
+using System.Text.Json;
 using Tradeinator.Shared.Attributes;
+using Tradeinator.Shared.Models;
 using Tradeinator.Strategy.Shared;
 using Xunit.Abstractions;
 
@@ -15,22 +17,26 @@ public class SerialisationTest
     }
 
 
+    
     [Fact]
-    public void GetAttributesAppliedToClass()
+    public void SerialiseStrategy_ReturnsJson()
     {
+        var expected = "[{\"Name\":\"Type\",\"PropertyName\":\"Type\",\"Value\":10,\"Type\":\"System.Int32\"}]";
         var strategy = new ExampleStrategy();
-        var type = strategy.GetType();
-        var props = type.GetProperties();
+        var loader = new StrategyLoader();
+        var actual = loader.SerialiseStrategy(strategy);
+        
+        Assert.Equal(expected, actual);
+    }
 
-        foreach (var propertyInfo in props)
-        {
-            var attribute = (SerialisableParameter) Attribute.GetCustomAttribute(propertyInfo, typeof(SerialisableParameter));
-            if (attribute is null)
-            {
-                _testOutputHelper.WriteLine($"Property {propertyInfo.Name} had no attributes applied");
-            } 
-            else
-                _testOutputHelper.WriteLine($"{attribute.SerialsedName} | {attribute.Value}");
-        }
+    [Fact]
+    public void LoadSimpleStrategy_ReturnsConfiguredStrategy()
+    {
+        var expected = "[{\"Name\":\"Type\",\"PropertyName\":\"Type\",\"Value\":10,\"Type\":\"System.Int32\"}]";
+        var loader = new StrategyLoader();
+        var actual = loader.LoadStrategy<ExampleStrategy>(expected);
+        
+        Assert.NotNull(actual);
+        Assert.Equal(10, actual.Type);
     }
 }
