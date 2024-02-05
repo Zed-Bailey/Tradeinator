@@ -34,19 +34,17 @@ public class OrderMessageCreator
     public static SystemMessage CreateOpenOrderMessage(string strategy, CreateOrderResponse response)
     {
         
-        var severity = response.ErrorCode == "201" ? MessagePriority.Information : MessagePriority.Critical;
-        var msg = severity != MessagePriority.Information
-            ? response.ErrorMessage
-            : $"""
-               Created a new order.
-               order id = {response.OrderCreateTransaction.BatchID}
-               fill price = $ {response.OrderFillTransaction.Price}
-               units = {response.OrderFillTransaction.Units}
-               financing = $ {response.OrderFillTransaction.Financing}
-               """;
+        
+        var msg = $"""
+                   Created a new order.
+                   order id = {response.OrderCreateTransaction.BatchID}
+                   fill price = $ {response.OrderFillTransaction.Price}
+                   units = {response.OrderFillTransaction.Units}
+                   financing = $ {response.OrderFillTransaction.Financing}
+                   """;
         return new SystemMessage()
         {
-            Priority = severity,
+            Priority = MessagePriority.Information,
             Symbol = "AUD/CHF",
             StrategyName = strategy,
             Message = msg
