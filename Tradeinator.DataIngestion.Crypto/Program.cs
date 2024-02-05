@@ -1,18 +1,11 @@
 ﻿using Alpaca.Markets;
 using Microsoft.Extensions.Configuration;
 using Serilog;
+using Tradeinator.Configuration;
 using Tradeinator.DataIngestion.Shared;
 using Tradeinator.Shared;
 
-// load the dotenv file into the environment
-DotEnv.LoadEnvFiles(Path.Combine(AppContext.BaseDirectory, ".env"));
-
-// load the config
-var config = new ConfigurationBuilder()
-    .SetBasePath(AppContext.BaseDirectory)
-    .AddJsonFile("appsettings.json", true)
-    .AddEnvironmentVariables()
-    .Build();
+var config = new ConfigurationLoader();
 
 var host = config["Rabbit:Host"];
 var exchangeName = config["Rabbit:Exchange"];

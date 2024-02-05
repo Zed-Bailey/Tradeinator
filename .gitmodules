@@ -1,0 +1,3 @@
+[submodule "SimpleBacktestLib"] 
+  path = SimpleBacktestLib
+	url = https://github.com/Zed-Bailey/SimpleBacktestLib.git

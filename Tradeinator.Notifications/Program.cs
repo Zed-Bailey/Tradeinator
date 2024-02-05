@@ -2,19 +2,12 @@
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Configuration;
 using Serilog;
+using Tradeinator.Configuration;
 using Tradeinator.Shared;
 using Tradeinator.Shared.Extensions;
 using Tradeinator.Shared.Models;
 
-// load the dotenv file into the environment
-DotEnv.LoadEnvFiles(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
-
-// load the config
-var config = new ConfigurationBuilder()
-    .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json", true)
-    .AddEnvironmentVariables()
-    .Build();
+var config = new ConfigurationLoader();
 
 // create serilog logger with file and console output
 await using var logger = new LoggerConfiguration()

@@ -4,6 +4,7 @@ using GeriRemenyi.Oanda.V20.Client.Model;
 using GeriRemenyi.Oanda.V20.Sdk;
 using GeriRemenyi.Oanda.V20.Sdk.Common.Types;
 using Serilog;
+using Tradeinator.Configuration;
 using Tradeinator.Shared;
 using Tradeinator.Shared.EventArgs;
 using Tradeinator.Shared.Extensions;
@@ -12,12 +13,11 @@ using Tradeinator.Strategy.MamaFama;
 using Tradeinator.Strategy.Shared;
 
 // load config
-var configLoader = new ConfigurationLoader(AppContext.BaseDirectory);
-configLoader.LoadConfiguration();
+var configLoader = new ConfigurationLoader();
 
-var strategyVersion1 = configLoader.Get("Accounts:SV1");
-var strategyVersion2 = configLoader.Get("Accounts:SV2");
-var strategyVersion3 = configLoader.Get("Accounts:SV3");
+var strategyVersion1 = configLoader.Get("MamaFama:Accounts:SV1");
+var strategyVersion2 = configLoader.Get("MamaFama:Accounts:SV2");
+var strategyVersion3 = configLoader.Get("MamaFama:Accounts:SV3");
 var apiToken = configLoader.Get("OANDA_API_TOKEN");
 
 

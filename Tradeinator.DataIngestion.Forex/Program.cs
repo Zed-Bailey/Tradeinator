@@ -1,11 +1,11 @@
 ﻿using Coravel;
 using Serilog;
+using Tradeinator.Configuration;
 using Tradeinator.DataIngestion.Forex;
 using Tradeinator.DataIngestion.Shared;
 using Tradeinator.Shared;
 
-var config = new ConfigurationLoader(AppContext.BaseDirectory);
-config.LoadConfiguration();
+var config = new ConfigurationLoader();
 
 var exchangeHost = config.Get("Rabbit:Host");
 var exchangeName = config.Get("Rabbit:Exchange");

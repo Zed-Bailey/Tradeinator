@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Tradeinator.Shared\Tradeinator.Shared.csproj" />
+        <ProjectReference Include="..\Tradeinator.Configuration\Tradeinator.Configuration.csproj" />
       <ProjectReference Include="..\Tradeinator.Strategy.Shared\Tradeinator.Strategy.Shared.csproj" />
     </ItemGroup>
 
@@ -22,9 +23,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="appsettings.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
       <None Update=".env">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.FluentUI.AspNetCore.Components;
+using Tradeinator.Configuration;
 using Tradeinator.Dashboard.Data;
 using Tradeinator.Shared;
 

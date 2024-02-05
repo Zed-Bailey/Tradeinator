@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.DataIngestion.F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Strategy.MamaFama", "Tradeinator.Strategy.MamaFama\Tradeinator.Strategy.MamaFama.csproj", "{0798D6DA-240D-4A57-A338-74689B95DB2D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Configuration", "Tradeinator.Configuration\Tradeinator.Configuration.csproj", "{1A1485EA-DCC7-4ECE-A265-40F2964352A6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -84,5 +86,9 @@ Global
 		{0798D6DA-240D-4A57-A338-74689B95DB2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0798D6DA-240D-4A57-A338-74689B95DB2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0798D6DA-240D-4A57-A338-74689B95DB2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A1485EA-DCC7-4ECE-A265-40F2964352A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A1485EA-DCC7-4ECE-A265-40F2964352A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A1485EA-DCC7-4ECE-A265-40F2964352A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A1485EA-DCC7-4ECE-A265-40F2964352A6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

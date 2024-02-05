@@ -32,13 +32,38 @@ The system has a file watcher registered to this file, when the file changes sym
 - change console programs to worker services?
 - add systemd service files to each project that can be easily copied
 - solution level config file or a project that contains the config files and a class to load them
-- 
+
+## Configuration
+All config files are located in the `Tradeinator.Configuration` project.
+
+This provides a central place for all config files and reduces the need to duplicate them across projects
+
+The configuration is loaded as an IConfiguration from Microsoft.Extensions.Configuration and loads everything from the `appsettings.json` file and `.env` file
+
+Configuration files are copied to the build directory.
+
+
+An example of using the config loader
+```csharp
+using Tradeinator.Configuration;
+
+// config is loaded
+var config = new ConfigurationLoader();
+
+// config can be accessed using indexing
+config["Rabbit:Host"]; // will return the host from the appsettings.json file
+
+// or with the .Get(string key) method
+config.Get("Rabbit:Host"); // will return the same value as the index call
+
+```
+
 
 ## Tradeinator.Listener
 Provides a simple example of registering to an topic and consuming data
 
 ## Tradeinator.Backtester
-Provides a framework for quickly backtesting strategies using the `SimpleBackTestLib` library
+Provides a framework for quickly backtesting strategies using a forked version of the `SimpleBackTestLib` library
 
 Strategies inherit from the BacktestRunner abstract class and must have the BacktestStrategyMetadata attribute added for it to be discoverable.
 The meta data attribute defines some properties of the strategy such as it's name and budget.

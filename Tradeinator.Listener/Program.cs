@@ -1,14 +1,17 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using System.Text;
+using Tradeinator.Configuration;
 using Tradeinator.Shared;
 
-string host = "localhost";
-string exchangeName = "test_exchange";
 
+var config = new ConfigurationLoader();
 
+var host = config["Rabbit:Host"];
+var exchangeName = config["Rabbit:Exchange"];
+
+// will listen to all events that contain topic 'bar.'
 using var exchange = new ReceiverExchange(host, exchangeName, "bar.*");
-
 
 exchange.ConsumerOnReceive += (sender, eventArgs) =>
 {
