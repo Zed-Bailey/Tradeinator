@@ -7,18 +7,43 @@ namespace Tradeinator.Strategy.Shared;
 
 public class StrategyLoader
 {
-    /*
-     * connect to database
-     * if no strategies added with strategy token, serialise strategy default editable parameter values and save to DB
-     * else load strategies from DB
-     *
-     * 
-     */
 
-    public StrategyLoader()
+
+    /// <summary>
+    /// Will update an existing strategy object with the values in teh config object
+    /// </summary>
+    /// <param name="strategy">The existing strategy to update</param>
+    /// <param name="newJsonConfig">The new json config</param>
+    /// <typeparam name="T">the strategy type</typeparam>
+    /// <exception cref="ArgumentException">throws when failed to deserialise the json</exception>
+    /// <exception cref="NoMatchingProperty">throws when no property matches in the class</exception>
+    public void UpdateStrategyProperties<T>(T strategy, string newJsonConfig)
     {
+        var properties = JsonSerializer.Deserialize<SerialisedProperty[]>(newJsonConfig);
+        if (properties == null)
+            throw new ArgumentException($"Failed to deserialise json config.\n {newJsonConfig}", nameof(newJsonConfig));
         
+        foreach (var property in properties)
+        {
+            var p = strategy.GetType().GetProperty(property.PropertyName);
+            if (p == null)
+                throw new NoMatchingProperty(
+                    $"No property was found on {nameof(strategy)} with name {property.PropertyName}");
+            // as the property is an object type, when deserialised it is converted to a JsonElement by System.Text.Json
+            var element = (JsonElement)property.Value;
+            
+            // deserialise the element to the property type we have saved
+            // todo: handle type being null
+            
+            var actualValue = element.Deserialize(Type.GetType(property.Type));
+            
+            // set the value of the property on the object
+            p.SetValue(strategy,  actualValue);
+        }
+
+        return;
     }
+    
     
     /// <summary>
     /// Initialises a strategy of type T and populates it's properties based on the json config
@@ -77,7 +102,7 @@ public class StrategyLoader
             if (attribute is null) continue;
             
             serialisedProperties.Add(new SerialisedProperty(
-                    attribute.DescriptiveName, propertyInfo.Name ,attribute.Value, propertyInfo.PropertyType.ToString()
+                    attribute.DescriptiveName, propertyInfo.Name , propertyInfo.GetValue(strategy), propertyInfo.PropertyType.ToString()
                 )
             );
             
