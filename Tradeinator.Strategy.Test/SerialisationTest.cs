@@ -1,23 +1,10 @@
-using System.Text.Json;
-using Tradeinator.Shared.Attributes;
-using Tradeinator.Shared.Models;
 using Tradeinator.Strategy.Shared;
-using Xunit.Abstractions;
 
 namespace Tradeinator.Strategy.Test;
 
 
 public class SerialisationTest
 {
-    private readonly ITestOutputHelper _testOutputHelper;
-
-    public SerialisationTest(ITestOutputHelper testOutputHelper)
-    {
-        _testOutputHelper = testOutputHelper;
-    }
-
-
-    
     [Fact]
     public void SerialiseStrategy_ReturnsJson()
     {
