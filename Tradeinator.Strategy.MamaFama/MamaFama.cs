@@ -37,7 +37,10 @@ public class MamaFama : StrategyBase
     public bool UseSecondaryTrigger { get; set; } = false;
     public string StrategyVersion { get; set; }
     //---------
-    
+
+    public MamaFama()
+    { }
+
     public MamaFama(string accountId, string apiToken, string strategyName)
     {
         _accountId = accountId;
@@ -58,16 +61,7 @@ public class MamaFama : StrategyBase
         var candles = await _oandaApiConnection
             .GetInstrument(InstrumentName.AUD_CHF)
             .GetLastNCandlesAsync(CandlestickGranularity.M30, 200);
-
-        // var data = await _oandaApiConnection.InstrumentApi.GetInstrumentCandlesAsync(
-        //     InstrumentName.AUD_CHF,
-        //     DateTimeFormat.RFC3339,
-        //     granularity: CandlestickGranularity.M30,
-        //     smooth: true,
-        //     count: 200
-        // );
-        //
-        // var candles = data?.Candles;
+        
         var candlesticks = candles.ToArray();
         if (candles == null || !candlesticks.Any()) throw new Exception("candle data was not loaded in");
 
