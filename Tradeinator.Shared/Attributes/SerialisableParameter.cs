@@ -8,9 +8,8 @@ public class SerialisableParameter: Attribute
     public string DescriptiveName { get; set; }
     
     
-    public SerialisableParameter(string name)
+    public SerialisableParameter(string descriptiveName = "")
     {
-        DescriptiveName = name;
-        
+        DescriptiveName = descriptiveName;
     }
 }
