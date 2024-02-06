@@ -10,8 +10,7 @@ public class SerialisationTest
     {
         var expected = "[{\"DescriptiveName\":\"SomeValue\",\"PropertyName\":\"SomeValue\",\"Value\":10,\"Type\":\"System.Int32\"}]";
         var strategy = new ExampleStrategy();
-        var loader = new StrategyLoader();
-        var actual = loader.SerialiseStrategy(strategy);
+        var actual = StrategyLoader.SerialiseStrategy(strategy);
         
         Assert.NotNull(actual);
         Assert.Equal(expected, actual);
@@ -21,8 +20,7 @@ public class SerialisationTest
     public void LoadSerialisedStrategy_ReturnsConfiguredStrategy()
     {
         var expected = "[{\"DescriptiveName\":\"SomeValue\",\"PropertyName\":\"SomeValue\",\"Value\":10,\"Type\":\"System.Int32\"}]";
-        var loader = new StrategyLoader();
-        var actual = loader.LoadStrategy<ExampleStrategy>(expected);
+        var actual = StrategyLoader.LoadStrategy<ExampleStrategy>(expected);
         
         Assert.NotNull(actual);
         Assert.Equal(10, actual.SomeValue);

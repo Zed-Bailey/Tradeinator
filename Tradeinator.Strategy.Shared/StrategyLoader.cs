@@ -17,7 +17,7 @@ public class StrategyLoader
     /// <typeparam name="T">the strategy type</typeparam>
     /// <exception cref="ArgumentException">throws when failed to deserialise the json</exception>
     /// <exception cref="NoMatchingProperty">throws when no property matches in the class</exception>
-    public void UpdateStrategyProperties<T>(T strategy, string newJsonConfig)
+    public static void UpdateStrategyProperties<T>(T strategy, string newJsonConfig)
     {
         var properties = JsonSerializer.Deserialize<SerialisedProperty[]>(newJsonConfig);
         if (properties == null)
@@ -40,8 +40,7 @@ public class StrategyLoader
             // set the value of the property on the object
             p.SetValue(strategy,  actualValue);
         }
-
-        return;
+        
     }
     
     
@@ -52,7 +51,7 @@ public class StrategyLoader
     /// <typeparam name="T">The type</typeparam>
     /// <exception cref="NoMatchingProperty">thrown when no property was found matching the serialised properties PropertyName value</exception>
     /// <returns>The deserialised strategy</returns>
-    public T LoadStrategy<T>(string json) where T : new()
+    public static T LoadStrategy<T>(string json) where T : new()
     {
         var properties = JsonSerializer.Deserialize<SerialisedProperty[]>(json);
         if (properties == null)
@@ -88,7 +87,7 @@ public class StrategyLoader
     /// </summary>
     /// <param name="strategy"></param>
     /// <returns></returns>
-    public string? SerialiseStrategy(StrategyBase strategy)
+    public static string? SerialiseStrategy(StrategyBase strategy)
     {
         var type = strategy.GetType();
         var props = type.GetProperties();
