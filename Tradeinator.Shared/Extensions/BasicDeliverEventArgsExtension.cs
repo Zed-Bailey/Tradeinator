@@ -12,20 +12,26 @@ public static class BasicDeliverEventArgsExtension
     /// <param name="args">the event args</param>
     /// <typeparam name="T">the type to convert to</typeparam>
     /// <returns>the deserialized type, or null if deserialization failed</returns>
-    public static T? DeserializeToModel<T>(this BasicDeliverEventArgs args)
+    public static T? DeserializeToModel<T>(this BasicDeliverEventArgs args) where T: class
     {
         try
         {
             // string should be a json string
             var body = args.BodyAsString();
             
-            return JsonSerializer.Deserialize<T>(body);
+            return JsonSerializer.Deserialize<T>(body, new JsonSerializerOptions()
+            {
+                
+            });
         }
         catch (Exception e)
         {
-            return default;
+            return null;
         }
     }
+    
+
+    
 
     public static string BodyAsString(this BasicDeliverEventArgs args)
     {

@@ -87,11 +87,12 @@ var strategies = new StrategyBuilder<MamaFama>(connectionString)
 
 foreach (var strategy in strategies.LoadedStrategies)
 {
-    Console.WriteLine(strategy.RrsiLevel);
+    Console.WriteLine(strategy.Key + "|" + strategy.Value.RrsiLevel );
 }
-return;
 
-await strategies.Init(); // will initalise all the strategies
+
+
+// await strategies.Init(); // will initalise all the strategies
 
 
 
@@ -125,7 +126,7 @@ logger.Information("Initialising strategies");
 // await strategy3.Init();
 logger.Information("initialised");
 
-exchange.ConsumerOnReceive += NewBarReceive;
+// exchange.ConsumerOnReceive += NewBarReceive;
 
 logger.Information("Exchange starting");
 await exchange.StartConsuming(tokenSource.Token);
