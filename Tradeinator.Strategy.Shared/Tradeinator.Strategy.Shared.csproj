@@ -11,6 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Tradeinator.Database\Tradeinator.Database.csproj" />
       <ProjectReference Include="..\Tradeinator.Shared\Tradeinator.Shared.csproj" />
       
     </ItemGroup>
