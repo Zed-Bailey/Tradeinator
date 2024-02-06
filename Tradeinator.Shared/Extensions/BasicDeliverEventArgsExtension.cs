@@ -1,6 +1,7 @@
 using System.Text;
-using System.Text.Json;
+using Newtonsoft.Json;
 using RabbitMQ.Client.Events;
+
 
 namespace Tradeinator.Shared.Extensions;
 
@@ -18,11 +19,11 @@ public static class BasicDeliverEventArgsExtension
         {
             // string should be a json string
             var body = args.BodyAsString();
-            
-            return JsonSerializer.Deserialize<T>(body, new JsonSerializerOptions()
+            return JsonConvert.DeserializeObject<T>(body, new JsonSerializerSettings()
             {
-                
+                MissingMemberHandling = MissingMemberHandling.Error
             });
+
         }
         catch (Exception e)
         {
@@ -30,9 +31,6 @@ public static class BasicDeliverEventArgsExtension
         }
     }
     
-
-    
-
     public static string BodyAsString(this BasicDeliverEventArgs args)
     {
         var body = args.Body.ToArray();
