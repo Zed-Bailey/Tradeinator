@@ -6,6 +6,7 @@ using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Models;
 using Serilog;
 using Serilog.Core;
+using Tradeinator.Shared.Attributes;
 using Tradeinator.Shared.EventArgs;
 using Tradeinator.Shared.Extensions;
 using Tradeinator.Shared.Models;
@@ -33,8 +34,13 @@ public class MamaFama : StrategyBase
     
     //---------
     // Strategy Properties
+    [SerialisableParameter]
     public double RrsiLevel { get; set; } = 50D;
+    
+    [SerialisableParameter]
     public bool UseSecondaryTrigger { get; set; } = false;
+    
+    [SerialisableParameter]
     public string StrategyVersion { get; set; }
     //---------
 
@@ -45,15 +51,17 @@ public class MamaFama : StrategyBase
     {
         _accountId = accountId;
         _apiToken = apiToken;
-        _oandaApiConnection = new OandaApiConnection(OandaConnectionType.FxPractice, _apiToken);
-        _tradeManager = new OandaTradeManager(_apiToken);
+       
         
         StrategyVersion = strategyName;
-        
         _logger = new LoggerConfiguration()
             .WriteTo.Console()
             .WriteTo.File($"{StrategyVersion}.log")
             .CreateLogger();
+        
+        _oandaApiConnection = new OandaApiConnection(OandaConnectionType.FxPractice, _apiToken);
+        _tradeManager = new OandaTradeManager(_apiToken);
+        
     }
 
     public override async Task Init()
