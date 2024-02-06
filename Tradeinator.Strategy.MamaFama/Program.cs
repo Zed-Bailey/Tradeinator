@@ -1,6 +1,8 @@
 ﻿using RabbitMQ.Client.Events;
 using Serilog;
 using Tradeinator.Configuration;
+using Tradeinator.Database;
+using Tradeinator.Database.Models;
 using Tradeinator.Shared;
 using Tradeinator.Shared.EventArgs;
 using Tradeinator.Shared.Extensions;
@@ -41,6 +43,12 @@ if (ValidateNotNull(exchangeHost, exchangeName))
     return;
 }
 
+if (ValidateNotNull(connectionString))
+{
+    Console.WriteLine("[ERROR] db connection string was null");
+    return;
+}
+
 await using var logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.File("general.log")
@@ -62,21 +70,9 @@ using var exchange = new PublisherReceiverExchange(
 );
 
 
-/*
- strategies = Load
- .fromDB // json configs exist in db
- .elseCreate // else load strategy with default values
- 
- ....
- ....
- 
- // dispose strategies
- await strategies.foreachAsync(disposeasync);
- 
- */
 
 
-var strategies = new StrategyBuilder<MamaFama>(connectionString)
+var strategies = new StrategyBuilder<MamaFama>(connectionString, logger)
     .WithSlug(StrategySlug) // the slug of the strategy
     .WithExchange(exchange) // will register a listener to consume change events
     .WithMax(3) // max number of strategies that can be added
@@ -84,11 +80,6 @@ var strategies = new StrategyBuilder<MamaFama>(connectionString)
     .LoadFromDb() // load strategies from db
     .ElseCreate(new MamaFama()) // create default strategy, serialise it and save it to DB
     .Build();
-
-foreach (var strategy in strategies.LoadedStrategies)
-{
-    Console.WriteLine(strategy.Key + "|" + strategy.Value.RrsiLevel );
-}
 
 
 
@@ -103,17 +94,7 @@ foreach (var strategy in strategies.LoadedStrategies)
 // {
 //     UseSecondaryTrigger = false,
 // };
-// await using var strategy2 = new MamaFama(strategyVersion2, apiToken, "MamaFamaV2")
-// {
-//     RrsiLevel = 50,
-//     UseSecondaryTrigger = true,
-// };
-//
-// await using var strategy3 = new MamaFama(strategyVersion3, apiToken, "MamaFamaV3")
-// {
-//     RrsiLevel = 45,
-//     UseSecondaryTrigger = true,
-// };
+
 //
 //
 // strategy1.SendMessageNotification += OnSendMessageNotification;
