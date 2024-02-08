@@ -1,6 +1,10 @@
 ﻿@page "/"
 @using Microsoft.FluentUI.AspNetCore.Components
 @using GeriRemenyi.Oanda.V20.Client.Model
+@using GeriRemenyi.Oanda.V20.Sdk
+@using GeriRemenyi.Oanda.V20.Sdk.Common.Types
+@using GeriRemenyi.Oanda.V20.Client.Client
+@inject IConfiguration Config
 
 
 <PageTitle>Index</PageTitle>
@@ -52,16 +56,30 @@
         <FluentCard>
             <h4>View latest currency prices</h4>
             
-            <FluentSelect Appearance="Appearance.Filled" Position="SelectPosition.Below" Id="currencySelect" name="currencySelect" ValueChanged="@(e => selectValue = e)" TOption="string" Height="300px">
-                @foreach (var currency in instruments)
-                {
-                    <FluentOption Value="@currency">@currency</FluentOption>
-                }
-            </FluentSelect>
+            <FluentStack>
+                <FluentSelect Appearance="Appearance.Filled" Position="SelectPosition.Below" Id="currencySelect" name="currencySelect" ValueChanged="@(e => OnInstrumentChange(e))" TOption="string" Height="300px">
+                    @foreach (var currency in instruments)
+                    {
+                        <FluentOption Value="@currency">@(currency.Replace("_", "/"))</FluentOption>
+                    }
+                </FluentSelect>
+                <FluentSelect Appearance="Appearance.Filled" Position="SelectPosition.Below" Id="granularitySelect" name="currencySelect" ValueChanged="@(e => OnGranularityChange(e))" TOption="string" Height="300px">
+                    @foreach (var granularity in granularities)
+                    {
+                        <FluentOption Value="@granularity" Selected="@(granularity == selectedGranularityValue)">@granularity</FluentOption>
+                    }
+                </FluentSelect>
+                
+            </FluentStack>
+            
             
 
+            @if (!string.IsNullOrEmpty(candleError))
+            {
+                <p class="text-danger">@candleError</p>
+            }
             @* ant design chart *@
-            <Line Data="data" Config="config"/>
+            <Line Data="candles" Config="config" @ref="lineChart"/>
             
         </FluentCard>
     </FluentGridItem>
@@ -70,17 +88,7 @@
 </FluentGrid>
 
 @code {
-    object[] data = new object[] {
-        new  { year= "1991", value= 3 },
-        new  { year= "1992", value= 4 },
-        new  { year= "1993", value= 3.5 },
-        new  { year= "1994", value= 5 },
-        new  { year= "1995", value= 4.9 },
-        new  { year= "1996", value= 6 },
-        new  { year= "1997", value= 7 },
-        new  { year= "1998", value= 9 },
-        new  { year= "1999", value= 13 },
-    };
+    IChartComponent? lineChart;
 
     LineConfig config = new LineConfig()
     {
@@ -96,18 +104,87 @@
         },
         Padding = "auto",
         AutoFit = true,
-        XField = "year",
-        YField = "value",
-        Smooth = true,
+        XField = "time",
+        YField = "price",
+        StepType = "middle",
+        YAxis = new ValueAxis
+        {
+            Nice = true,
+        }
+        
     };
     
     string[] instruments = Enum.GetNames(typeof(InstrumentName));
-    string selectValue = "";
+    string[] granularities = Enum.GetNames(typeof(CandlestickGranularity));
+    string selectedInstrumentValue = "";
+    string selectedGranularityValue = "H1";
+    
+    IOandaApiConnection? connection;
+    string? candleError = null;
+    dynamic[] candles;
 
-    protected override void OnInitialized()
+    Task OnInstrumentChange(string value)
     {
-        base.OnInitialized();
-        selectValue = instruments[0];
+        selectedInstrumentValue = value;
+        return GetCandleData();
+    }
+
+    Task OnGranularityChange(string value)
+    {
+        selectedGranularityValue = value;
+        return GetCandleData();
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        selectedInstrumentValue = instruments[0];
+        var token = Config["OANDA_API_TOKEN"];
+       
+        var server = OandaConnectionType.FxPractice;
+        connection = new OandaApiConnectionFactory().CreateConnection(server, token);
+        
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            await GetCandleData();
+        }
+    }
+
+    async Task GetCandleData()
+    {
+        try
+        {
+            var candlesResponse = await connection.InstrumentApi.GetInstrumentCandlesAsync(
+                Enum.Parse<InstrumentName>(selectedInstrumentValue),
+                DateTimeFormat.RFC3339,
+                granularity: Enum.Parse<CandlestickGranularity>(selectedGranularityValue),
+                count: 200
+            );
+            candles = candlesResponse.Candles
+                .Select(x => new
+                {
+                    price = double.Round((x.Mid.O + x.Mid.H + x.Mid.L + x.Mid.C) / 4d, 5),
+                    time = DateTime.Parse(x.Time).ToString("g")
+                })
+                .ToArray();
+            
+            // update the charts scales
+            double min = candles.Min(x => x.price);
+            double max = candles.Max(x => x.price);
+            config.YAxis.Min = min;
+            config.YAxis.Max = max;
+            // update chart with new config and data
+            await lineChart?.UpdateChart(config, data: candles);
+        }
+        catch (ApiException e)
+        {
+            candleError = e.Message;
+        }
     }
 
 }
