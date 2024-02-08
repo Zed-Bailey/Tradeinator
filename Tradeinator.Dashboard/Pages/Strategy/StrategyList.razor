@@ -20,7 +20,11 @@
     <PropertyColumn Property="@(e => e.StrategyName)"  />
     <PropertyColumn Property="@(e => e.CreatedAt)"  />
     <PropertyColumn Property="@(e => e.LastUpdated)"  />
-    
+    <TemplateColumn Title="Actions">
+        <FluentButton Appearance="Appearance.Lightweight" OnClick="@(() => OnDeleteStrategyClicked(context))">
+            <FluentIcon Value="@(new Icons.Regular.Size24.Delete())" Color="Color.Error" />
+        </FluentButton>
+    </TemplateColumn>
 
 </FluentDataGrid>
 
@@ -47,6 +51,13 @@
         }
     }
 
+    Task OnDeleteStrategyClicked(SavedStrategy toDelete)
+    {
+        context.SavedStrategies.Remove(toDelete);
+        context.SaveChangesAsync();
+        return InvokeAsync(StateHasChanged);
+    }
+    
     public async ValueTask DisposeAsync()
     {
         await context.DisposeAsync();

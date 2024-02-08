@@ -28,6 +28,8 @@ builder.Services.AddSingleton<EventService>(exchange);
 // register default http client, required for fluent ui
 builder.Services.AddHttpClient();
 builder.Services.AddFluentUIComponents();
+builder.Services.AddDataGridEntityFrameworkAdapter();
+
 builder.Services.AddDbContextFactory<ApplicationContext>(opt =>
 {
     opt.UseMySQL(builder.Configuration.GetConnectionString("DbConnection"));
