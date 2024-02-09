@@ -20,7 +20,6 @@ var configLoader = new ConfigurationLoader();
 var strategyVersion1 = configLoader.Get("MamaFama:Accounts:SV1");
 var strategyVersion2 = configLoader.Get("MamaFama:Accounts:SV2");
 var strategyVersion3 = configLoader.Get("MamaFama:Accounts:SV3");
-var apiToken = configLoader.Get("OANDA_API_TOKEN");
 var exchangeHost = configLoader.Get("Rabbit:Host");
 var exchangeName = configLoader.Get("Rabbit:Exchange");
 var connectionString = configLoader.Get("ConnectionStrings:DbConnection");
@@ -28,12 +27,6 @@ var connectionString = configLoader.Get("ConnectionStrings:DbConnection");
 if (ValidateNotNull(strategyVersion1, strategyVersion2, strategyVersion3))
 {
     Console.WriteLine("[ERROR] empty account number(s)");
-    return;
-}
-
-if (ValidateNotNull(apiToken))
-{
-    Console.WriteLine("[ERROR] Oanda api token was null or empty");
     return;
 }
 
@@ -70,44 +63,21 @@ using var exchange = new PublisherReceiverExchange(
 );
 
 
-
-
 var strategies = new StrategyBuilder<MamaFama>(connectionString, logger)
     .WithSlug(StrategySlug) // the slug of the strategy
     .WithExchange(exchange) // will register a listener to consume change events
     .WithMax(3) // max number of strategies that can be added
     .WithMessageNotificationCallback(OnSendMessageNotification) // register a callback for the send message notification event
-    .LoadFromDb() // load strategies from db
-    .ElseCreate(new MamaFama()) // create default strategy, serialise it and save it to DB
+    .WithDefaultStrategy(new MamaFama()) // register default strategy
     .Build();
 
 
 
-// await strategies.Init(); // will initalise all the strategies
-
-
-
-
-
-
-// await using var strategy1 = new MamaFama(strategyVersion1, apiToken, "MamaFamaV1")
-// {
-//     UseSecondaryTrigger = false,
-// };
-
-//
-//
-// strategy1.SendMessageNotification += OnSendMessageNotification;
-// strategy2.SendMessageNotification += OnSendMessageNotification;
-// strategy3.SendMessageNotification += OnSendMessageNotification;
+await strategies.Init(); // will initalise all the strategies
 
 logger.Information("Initialising strategies");
-// await strategy1.Init();
-// await strategy2.Init();
-// await strategy3.Init();
 logger.Information("initialised");
 
-// exchange.ConsumerOnReceive += NewBarReceive;
 
 logger.Information("Exchange starting");
 await exchange.StartConsuming(tokenSource.Token);
@@ -116,21 +86,6 @@ logger.Information("Exchange stopped");
 
 return;
 
-
-void NewBarReceive(object? sender, BasicDeliverEventArgs eventArgs)
-{
-    var bar = eventArgs.DeserializeToModel<Bar>();
-    logger.Information("received new bar {Bar}", bar);
-    if (bar == null)
-    {
-        logger.Warning("Received bar was null after deserialization. body: {Body} | topic binding: {Binding}", eventArgs.BodyAsString(), eventArgs.RoutingKey);
-        return;
-    }
-    //
-    // strategy1.NewBar(bar);
-    // strategy2.NewBar(bar);
-    // strategy3.NewBar(bar);
-}
 
 void OnSendMessageNotification(object? sender, SystemMessageEventArgs e)
 {
