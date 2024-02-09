@@ -1,0 +1,66 @@
+@page "/strategylist"
+@using Tradeinator.Database
+@using Microsoft.EntityFrameworkCore
+@using Tradeinator.Database.Models
+@using Microsoft.FluentUI.AspNetCore.Components;
+
+@inject IDbContextFactory<ApplicationContext> Dbfactory
+@implements IAsyncDisposable
+
+<h3>Strategy List</h3>
+@if (Loading)
+{
+    <p>Loading...</p>
+}
+
+
+<FluentDataGrid Items="@savedStrategies" ItemKey="@(p => p.SavedStrategyId)">
+    <PropertyColumn Property="@(e => e.SavedStrategyId)"  />
+    <PropertyColumn Property="@(e => e.Slug)" Sortable="true" />
+    <PropertyColumn Property="@(e => e.StrategyName)"  />
+    <PropertyColumn Property="@(e => e.CreatedAt)"  />
+    <PropertyColumn Property="@(e => e.LastUpdated)"  />
+    <TemplateColumn Title="Actions">
+        <FluentButton Appearance="Appearance.Lightweight" OnClick="@(() => OnDeleteStrategyClicked(context))">
+            <FluentIcon Value="@(new Icons.Regular.Size24.Delete())" Color="Color.Error" />
+        </FluentButton>
+    </TemplateColumn>
+
+</FluentDataGrid>
+
+
+
+@code {
+    ApplicationContext? context;
+    bool Loading = false;
+    IQueryable<SavedStrategy> savedStrategies;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        context = await Dbfactory.CreateDbContextAsync();
+
+        try
+        {
+            Loading = true;
+            savedStrategies = context.SavedStrategies.AsQueryable();
+        }
+        catch (Exception)
+        {
+            Loading = false;
+        }
+    }
+
+    Task OnDeleteStrategyClicked(SavedStrategy toDelete)
+    {
+        context.SavedStrategies.Remove(toDelete);
+        context.SaveChangesAsync();
+        return InvokeAsync(StateHasChanged);
+    }
+    
+    public async ValueTask DisposeAsync()
+    {
+        await context.DisposeAsync();
+    }
+
+}

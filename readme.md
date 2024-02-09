@@ -31,7 +31,7 @@ The system has a file watcher registered to this file, when the file changes sym
 - strategy init message
 - change console programs to worker services?
 - add systemd service files to each project that can be easily copied
-- solution level config file or a project that contains the config files and a class to load them
+- solution level config file or a project that contains the config files and a class to load them [DONE]
 
 ## Configuration
 All config files are located in the `Tradeinator.Configuration` project.
@@ -85,16 +85,32 @@ A Terminal GUI program to connect to the exchange and easily send test events
 <img alt="event tester demo image" src="docs/images/event_tester_demo.png"/>
 Built with the `Terminal.Gui` library
 
+## Tradeniator.Database
+This class library contains the EntityFramework DbContext and related migrations for a MySQL database.
+
+The project also contains a design time factory so the EF migration command can be run from the project directly
+
+Database connection is defined in the `Tradeinator.Configuration` project
+```bash
+cd Tradeinator.Database/
+dotnet ef database update
+```
+
+
 ## Tradeinator.DataIngestion.Shared
 Contains the implementation of the file watching and subscription management
 
 ## Tradeinator.DataIngestion.Crypto
 This is the entry point for all crypto data into the system.
 
+Data is fetched from alpaca through a web socket conenction. Currently websockets subscribe to a 1m bar granularity, this will be updated in future.
+
 Symbols to subscribe to are registered in the projects `symbols.txt` file
 
 ## Tradeinator.DataIngestion.Stocks
 This is the entry point for all stock data into the system.
+
+Data is fetched from alpaca through a web socket conenction. Currently websockets subscribe to a 1m bar granularity, this will be updated in future.
 
 Symbols to subscribe to are registered in the projects `symbols.txt` file
 
@@ -107,7 +123,108 @@ Symbols to subscribe to are registered in the projects `symbols.txt` file
 
 
 ## Tradeinator.Shared
-This project provides shared classes for the solution, such as the exchange implementations and some generic models
+This project provides shared classes for the solution, such as the RabbitMQ exchange implementations and some generic models
+
+
+## Tradeniator.Strategy.Shared
+This class library contains the meat of the strategies.
+It provides a base class called `StrategyBase` that all strategies must inherit from.
+Strategies are run by creating a new `StrategyBuilder` and adding the the required properties.
+When the `Build` method is called, the builder will fetch the strategies from the database and deserialise them into the provided strategy type
+
+
+### Creating a strategy
+create a new project and add a reference to the `Tradeniator.Strategy.Shared` and `Tradeniator.Shared` projects
+then in your `Program.cs` file copy the following example.
+As reference the `StrategyImplementingType` type is the name of the class that inherits from `StrategyBase` and implements the required methods.
+This should be changed to the name of your class.
+
+```csharp
+
+// A readable ID that denotes this group of strategies
+// used for filtering your strategies in the dashboard and registering events
+const string StrategySlug = "StrategyGroupName";
+
+// load config from appsettings.json and .env files
+var configLoader = new ConfigurationLoader();
+
+var apiToken = configLoader.Get("OANDA_API_TOKEN");
+var exchangeHost = configLoader.Get("Rabbit:Host");
+var exchangeName = configLoader.Get("Rabbit:Exchange");
+var connectionString = configLoader.Get("ConnectionStrings:DbConnection");
+
+if (ValidateNotNull(apiToken))
+{
+    Console.WriteLine("[ERROR] Oanda api token was null or empty");
+    return;
+}
+
+if (ValidateNotNull(exchangeHost, exchangeName))
+{
+    Console.WriteLine("[ERROR] exchange host or name was null");
+    return;
+}
+
+if (ValidateNotNull(connectionString))
+{
+    Console.WriteLine("[ERROR] db connection string was null");
+    return;
+}
+
+// serilog logger
+await using var logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("general.log")
+    .CreateLogger();
+
+
+var tokenSource = new CancellationTokenSource();
+Console.CancelKeyPress += (sender, eventArgs) =>
+{
+    logger.Information("Cancel requested");
+    tokenSource.Cancel();
+};
+
+
+// setup exchange
+using var exchange = new PublisherReceiverExchange(
+    exchangeHost, exchangeName,
+    "bar.AUD/CHF"
+);
+
+
+var strategies = new StrategyBuilder<StrategyImplementingType>(connectionString, logger)
+    .WithSlug(StrategySlug) // the slug of the strategy
+    .WithExchange(exchange) // will register a listener to consume change events
+    .WithMessageNotificationCallback(OnSendMessageNotification) // register a callback for the send message notification event
+    .WithDefaultStrategy(new StrategyImplementingType()) // register default strategy
+    .Build();
+
+// calls the Init method on all the strategies
+// the init method will provide a configuration to the strategy so environment and appsettings variables can be loaded
+await strategies.Init(); 
+
+logger.Information("Initialising strategies");
+logger.Information("initialised");
+
+
+logger.Information("Exchange starting");
+await exchange.StartConsuming(tokenSource.Token);
+logger.Information("Exchange stopped");
+
+
+return;
+
+
+void OnSendMessageNotification(object? sender, SystemMessageEventArgs e)
+{
+    var message = e.Message;
+    exchange.Publish(message, $"notification.{message.Symbol}");
+}
+
+bool ValidateNotNull(params string?[] values) => values.Any(string.IsNullOrEmpty);
+
+```
 
 ## Tradeinator.Notifications
 

@@ -1,0 +1,13 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=0c7d8d1e_002D5cb9_002D435b_002Dac12_002Dd453b38a5428/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="SerialisationTest #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;xUnit::6D297C18-11EF-402F-AEC6-7FDA34E11B3C::net7.0::Tradeinator.Strategy.Test.SerialisationTest&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::6D297C18-11EF-402F-AEC6-7FDA34E11B3C::net7.0::Tradeinator.Strategy.Test.UpdateStrategyTest.NewConfig_UpdatesExistingStrategy&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=1413b9d1_002D0487_002D4cbe_002D8a68_002D812aa1c861ec/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="SerialisationTest" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;xUnit::6D297C18-11EF-402F-AEC6-7FDA34E11B3C::net7.0::Tradeinator.Strategy.Test.SerialisationTest&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::6D297C18-11EF-402F-AEC6-7FDA34E11B3C::net7.0::Tradeinator.Strategy.Test.UpdateStrategyTest.NewConfig_UpdatesExistingStrategy&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
+&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

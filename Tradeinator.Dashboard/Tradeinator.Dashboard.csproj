@@ -7,14 +7,19 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="AntDesign.Charts" Version="0.5.1" />
       <PackageReference Include="GeriRemenyi.Oanda.V20.Client" Version="0.0.3" />
       <PackageReference Include="GeriRemenyi.Oanda.V20.Sdk" Version="0.0.6" />
-      <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.3.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.1" />
+      <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.4.1" />
+      <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.DataGrid.EntityFrameworkAdapter" Version="4.4.0" />
       <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.3.0" />
+      <PackageReference Include="MySql.EntityFrameworkCore" Version="8.0.0" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Tradeinator.Configuration\Tradeinator.Configuration.csproj" />
+      <ProjectReference Include="..\Tradeinator.Database\Tradeinator.Database.csproj" />
       <ProjectReference Include="..\Tradeinator.DataIngestion.Shared\Tradeinator.DataIngestion.Shared.csproj" />
     </ItemGroup>
 

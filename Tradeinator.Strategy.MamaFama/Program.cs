@@ -1,10 +1,8 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-using GeriRemenyi.Oanda.V20.Client.Model;
-using GeriRemenyi.Oanda.V20.Sdk;
-using GeriRemenyi.Oanda.V20.Sdk.Common.Types;
+﻿using RabbitMQ.Client.Events;
 using Serilog;
 using Tradeinator.Configuration;
+using Tradeinator.Database;
+using Tradeinator.Database.Models;
 using Tradeinator.Shared;
 using Tradeinator.Shared.EventArgs;
 using Tradeinator.Shared.Extensions;
@@ -12,36 +10,37 @@ using Tradeinator.Shared.Models;
 using Tradeinator.Strategy.MamaFama;
 using Tradeinator.Strategy.Shared;
 
+
+const string StrategySlug = "MAMAFAMA";
+
+
 // load config
 var configLoader = new ConfigurationLoader();
 
 var strategyVersion1 = configLoader.Get("MamaFama:Accounts:SV1");
 var strategyVersion2 = configLoader.Get("MamaFama:Accounts:SV2");
 var strategyVersion3 = configLoader.Get("MamaFama:Accounts:SV3");
-var apiToken = configLoader.Get("OANDA_API_TOKEN");
+var exchangeHost = configLoader.Get("Rabbit:Host");
+var exchangeName = configLoader.Get("Rabbit:Exchange");
+var connectionString = configLoader.Get("ConnectionStrings:DbConnection");
 
-
-if (string.IsNullOrEmpty(strategyVersion1) || string.IsNullOrEmpty(strategyVersion2) || string.IsNullOrEmpty(strategyVersion3))
+if (ValidateNotNull(strategyVersion1, strategyVersion2, strategyVersion3))
 {
     Console.WriteLine("[ERROR] empty account number(s)");
     return;
 }
 
-if (string.IsNullOrEmpty(apiToken))
-{
-    Console.WriteLine("[ERROR] Oanda api token was null or empty");
-    return;
-}
-
-var exchangeHost = configLoader.Get("Rabbit:Host");
-var exchangeName = configLoader.Get("Rabbit:Exchange");
-
-if (string.IsNullOrEmpty(exchangeHost) || string.IsNullOrEmpty(exchangeName))
+if (ValidateNotNull(exchangeHost, exchangeName))
 {
     Console.WriteLine("[ERROR] exchange host or name was null");
     return;
 }
-// initialise serilog loggers for each strategy, writing to console and file
+
+if (ValidateNotNull(connectionString))
+{
+    Console.WriteLine("[ERROR] db connection string was null");
+    return;
+}
 
 await using var logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -64,56 +63,20 @@ using var exchange = new PublisherReceiverExchange(
 );
 
 
-
-await using var strategy1 = new MamaFama(strategyVersion1, apiToken, "MamaFamaV1")
-{
-    UseSecondaryTrigger = false,
-};
-await using var strategy2 = new MamaFama(strategyVersion2, apiToken, "MamaFamaV2")
-{
-    RrsiLevel = 50,
-    UseSecondaryTrigger = true,
-};
-
-await using var strategy3 = new MamaFama(strategyVersion3, apiToken, "MamaFamaV3")
-{
-    RrsiLevel = 45,
-    UseSecondaryTrigger = true,
-};
+var strategies = new StrategyBuilder<MamaFama>(connectionString, logger)
+    .WithSlug(StrategySlug) // the slug of the strategy
+    .WithExchange(exchange) // will register a listener to consume change events
+    .WithMax(3) // max number of strategies that can be added
+    .WithMessageNotificationCallback(OnSendMessageNotification) // register a callback for the send message notification event
+    .WithDefaultStrategy(new MamaFama()) // register default strategy
+    .Build();
 
 
-strategy1.SendMessageNotification += OnSendMessageNotification;
-strategy2.SendMessageNotification += OnSendMessageNotification;
-strategy3.SendMessageNotification += OnSendMessageNotification;
+
+await strategies.Init(); // will initalise all the strategies
 
 logger.Information("Initialising strategies");
-await strategy1.Init();
-await strategy2.Init();
-await strategy3.Init();
 logger.Information("initialised");
-
-exchange.ConsumerOnReceive += (sender, eventArgs) =>
-{
-    var bar = eventArgs.DeserializeToModel<Bar>();
-    logger.Information("received new bar {Bar}", bar);
-    if (bar == null)
-    {
-        logger.Warning("Received bar was null after deserialization. body: {Body} | topic binding: {Binding}", eventArgs.BodyAsString(), eventArgs.RoutingKey);
-        return;
-    }
-    
-    strategy1.NewBar(bar);
-    strategy2.NewBar(bar);
-    strategy3.NewBar(bar);
-};
-
-exchange.Publish(new SystemMessageEventArgs(new SystemMessage()
-{
-    Message = "Initialised MamaFama strategy",
-    Priority = MessagePriority.Information,
-    StrategyName = "MamaFama",
-    Symbol = "AUD/CHF"
-}), "notifications.AUD/CHF");
 
 
 logger.Information("Exchange starting");
@@ -124,9 +87,10 @@ logger.Information("Exchange stopped");
 return;
 
 
-
 void OnSendMessageNotification(object? sender, SystemMessageEventArgs e)
 {
     var message = e.Message;
     exchange.Publish(message, $"notification.{message.Symbol}");
 }
+
+bool ValidateNotNull(params string?[] values) => values.Any(string.IsNullOrEmpty);

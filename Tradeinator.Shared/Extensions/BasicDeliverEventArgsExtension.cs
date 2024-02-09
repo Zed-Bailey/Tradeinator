@@ -1,6 +1,7 @@
 using System.Text;
-using System.Text.Json;
+using Newtonsoft.Json;
 using RabbitMQ.Client.Events;
+
 
 namespace Tradeinator.Shared.Extensions;
 
@@ -12,21 +13,24 @@ public static class BasicDeliverEventArgsExtension
     /// <param name="args">the event args</param>
     /// <typeparam name="T">the type to convert to</typeparam>
     /// <returns>the deserialized type, or null if deserialization failed</returns>
-    public static T? DeserializeToModel<T>(this BasicDeliverEventArgs args)
+    public static T? DeserializeToModel<T>(this BasicDeliverEventArgs args) where T: class
     {
         try
         {
             // string should be a json string
             var body = args.BodyAsString();
-            
-            return JsonSerializer.Deserialize<T>(body);
+            return JsonConvert.DeserializeObject<T>(body, new JsonSerializerSettings()
+            {
+                MissingMemberHandling = MissingMemberHandling.Error
+            });
+
         }
         catch (Exception e)
         {
-            return default;
+            return null;
         }
     }
-
+    
     public static string BodyAsString(this BasicDeliverEventArgs args)
     {
         var body = args.Body.ToArray();

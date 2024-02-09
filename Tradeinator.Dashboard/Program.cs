@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.FluentUI.AspNetCore.Components;
 using Tradeinator.Configuration;
 using Tradeinator.Dashboard.Data;
-using Tradeinator.Shared;
+using Tradeinator.Database;
+
 
 DotEnv.LoadEnvFiles(Path.Join(Directory.GetCurrentDirectory(), ".env"));
 
@@ -28,6 +28,12 @@ builder.Services.AddSingleton<EventService>(exchange);
 // register default http client, required for fluent ui
 builder.Services.AddHttpClient();
 builder.Services.AddFluentUIComponents();
+builder.Services.AddDataGridEntityFrameworkAdapter();
+
+builder.Services.AddDbContextFactory<ApplicationContext>(opt =>
+{
+    opt.UseMySQL(builder.Configuration.GetConnectionString("DbConnection"));
+});
 
 var app = builder.Build();
 

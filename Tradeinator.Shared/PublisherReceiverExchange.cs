@@ -22,8 +22,8 @@ public class PublisherReceiverExchange: IDisposable
     public EventHandler<BasicDeliverEventArgs>? ConsumerOnReceive = null;
     
     private readonly string _queueName;
-    private string[] _bindingKeys;
-    public string[] Bindings => _bindingKeys;
+    private List<string> _bindingKeys;
+    public string[] Bindings => _bindingKeys.ToArray();
     
     public PublisherReceiverExchange(string host, string exchangeName, params string[] bindingKeys)
     {
@@ -32,7 +32,7 @@ public class PublisherReceiverExchange: IDisposable
             throw new ArgumentException("1 or more topic binding keys are required");
         }
         
-        _bindingKeys = bindingKeys;
+        _bindingKeys = new List<string>(bindingKeys);
         
         _host = host;
         _factory = new ConnectionFactory {HostName = _host};
@@ -45,14 +45,20 @@ public class PublisherReceiverExchange: IDisposable
 
         _queueName = _channel.QueueDeclare().QueueName;
         
-        // bind the channel to all binding keys passed in
-        foreach (var key in bindingKeys)
-        {
-            _channel.QueueBind(_queueName, _exchangeName, routingKey: key);
-        }
+        // // bind the channel to all binding keys passed in
+        // foreach (var key in bindingKeys)
+        // {
+        //     _channel.QueueBind(_queueName, _exchangeName, routingKey: key);
+        // }
 
         _consumer = new EventingBasicConsumer(_channel);
     }
+
+    /// <summary>
+    /// Adds a new binding key, must be called before calling the Consume method
+    /// </summary>
+    /// <param name="key"></param>
+    public void RegisterNewBindingKey(string key) => _bindingKeys.Add(key);
 
     /// <summary>
     /// publish an object with topic to the exchange
@@ -94,6 +100,13 @@ public class PublisherReceiverExchange: IDisposable
         {
             throw new ArgumentNullException(nameof(ConsumerOnReceive));
         }
+        
+        // bind the channel to all binding keys passed in
+        foreach (var key in _bindingKeys)
+        {
+            _channel.QueueBind(_queueName, _exchangeName, routingKey: key);
+        }
+
         
         _consumer.Received += ConsumerOnReceive;
         _channel.BasicConsume(_queueName, true, _consumer);
