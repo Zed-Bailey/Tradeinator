@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using RabbitMQ.Client.Events;
 using Serilog.Core;
+using Tradeinator.Configuration;
 using Tradeinator.Database;
 using Tradeinator.Database.Models;
 using Tradeinator.Shared;
@@ -16,8 +17,8 @@ public class StrategyBuilder<T>: IAsyncDisposable where T : StrategyBase, new()
     private PublisherReceiverExchange _exchange;
     private int _maxStrategies;
     private string _slug;
-    private  EventHandler<SystemMessageEventArgs> _messageNotificationCallback;
-    private EventHandler _barCallback;
+    private EventHandler<SystemMessageEventArgs>? _messageNotificationCallback;
+    private EventHandler? _barCallback;
     private string _connectionString;
     private string? _defaultSerialisedStrategy;
     private Logger _logger;
@@ -30,13 +31,21 @@ public class StrategyBuilder<T>: IAsyncDisposable where T : StrategyBase, new()
         _logger = logger;
     }
 
+    /// <summary>
+    /// add the exchange used. automatically registers a new binding for strategy updates
+    /// </summary>
+    /// <param name="exchange"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException">throws if slug is not set</exception>
     public StrategyBuilder<T> WithExchange(PublisherReceiverExchange exchange)
     {
         _exchange = exchange;
         if (string.IsNullOrEmpty(_slug))
             throw new ArgumentException($"Slug must be set before calling {nameof(WithExchange)}");
         
-        _exchange.RegisterNewBindingKey(_slug);
+        // register a listener for the update strategy event
+        _exchange.RegisterNewBindingKey($"update.{_slug}");
+        _logger.Information("Registered new binding for strategy updates: update.{Slug}", _slug);
         
         return this;
     }
@@ -47,24 +56,35 @@ public class StrategyBuilder<T>: IAsyncDisposable where T : StrategyBase, new()
         return this;
     }
 
+    /// <summary>
+    /// register the strategy slug
+    /// </summary>
+    /// <param name="slug"></param>
+    /// <returns></returns>
     public StrategyBuilder<T> WithSlug(string slug)
     {
         _slug = slug;
         return this;
     }
     
+    /// <summary>
+    /// register the callback for notifications
+    /// </summary>
+    /// <param name="callback"></param>
+    /// <returns></returns>
     public StrategyBuilder<T> WithMessageNotificationCallback( EventHandler<SystemMessageEventArgs> callback)
     {
         _messageNotificationCallback = callback;
         return this;
     }
     
-    public StrategyBuilder<T> LoadFromDb()
-    {
-        return this;
-    }
     
-    public StrategyBuilder<T> ElseCreate(StrategyBase defaultStrategy)
+    /// <summary>
+    /// default strategy used if none are found in the database
+    /// </summary>
+    /// <param name="defaultStrategy"></param>
+    /// <returns></returns>
+    public StrategyBuilder<T> WithDefaultStrategy(StrategyBase defaultStrategy)
     {
         var serialised = StrategyLoader.SerialiseStrategy(defaultStrategy);
         _defaultSerialisedStrategy = serialised;
@@ -72,14 +92,27 @@ public class StrategyBuilder<T>: IAsyncDisposable where T : StrategyBase, new()
     }
 
 
+    /// <summary>
+    /// optional bar callback, invoked after calling the NewBar method on the strategies
+    /// </summary>
+    /// <param name="barCallback"></param>
+    /// <returns></returns>
     public StrategyBuilder<T> WithBarCallback(EventHandler barCallback)
     {
         _barCallback = barCallback;
         return this;
     }
     
+    /// <summary>
+    /// Builds the strategies
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
     public StrategyBuilder<T> Build()
     {
+        if (string.IsNullOrEmpty(_slug))
+            throw new ArgumentException("slug must be defined. call the WithSlug method before calling build");
+        
         using var context = DbContextCreator.CreateContext(_connectionString);
 
         var existingStrategies = context.SavedStrategies.Where(x => x.Slug == _slug).ToList();
@@ -117,9 +150,7 @@ public class StrategyBuilder<T>: IAsyncDisposable where T : StrategyBase, new()
             _logger.Information("Loaded strategy '{Name}', Last updated: {LastUpdated}", serialisedConfig.StrategyName, serialisedConfig.LastUpdated);
         }
         
-        // register a listener for the update strategy event
-        _exchange.RegisterNewBindingKey($"update.{_slug}");
-        _logger.Information("Registered new binding for strategy updates: update.{Slug}", _slug);
+        // register consumer
         _exchange.ConsumerOnReceive += NewEventReceived;
         _logger.Information("Registered exchange consumers");
         return this;
@@ -154,6 +185,7 @@ public class StrategyBuilder<T>: IAsyncDisposable where T : StrategyBase, new()
             {
                 value.NewBar(bar);
             }
+            _barCallback?.Invoke(this, e);
         }
         else
         {
@@ -169,9 +201,11 @@ public class StrategyBuilder<T>: IAsyncDisposable where T : StrategyBase, new()
     /// </summary>
     public async Task Init()
     {
+        var config = new ConfigurationLoader();
+        
         foreach (var strategy in LoadedStrategies.Values)
         {
-            await strategy.Init();
+            await strategy.Init(config);
         }
     }
 
