@@ -1,4 +1,5 @@
 using Alpaca.Markets;
+using Tradeinator.Configuration;
 using Tradeinator.Shared.EventArgs;
 using Tradeinator.Shared.Models;
 
@@ -19,7 +20,7 @@ public abstract class StrategyBase : IAsyncDisposable
         SendMessageNotification?.Invoke(this, e);
     }
     
-    public virtual Task Init()
+    public virtual Task Init(ConfigurationLoader configuration)
     {
         return Task.CompletedTask;
     }

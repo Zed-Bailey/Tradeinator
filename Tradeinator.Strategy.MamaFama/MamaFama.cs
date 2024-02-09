@@ -6,6 +6,7 @@ using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Models;
 using Serilog;
 using Serilog.Core;
+using Tradeinator.Configuration;
 using Tradeinator.Shared.Attributes;
 using Tradeinator.Shared.EventArgs;
 using Tradeinator.Shared.Extensions;
@@ -64,7 +65,7 @@ public class MamaFama : StrategyBase
         
     }
 
-    public override async Task Init()
+    public override async Task Init(ConfigurationLoader configuration)
     {
         var candles = await _oandaApiConnection
             .GetInstrument(InstrumentName.AUD_CHF)
