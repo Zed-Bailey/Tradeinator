@@ -135,10 +135,17 @@ When the `Build` method is called, the builder will fetch the strategies from th
 
 ### Creating a strategy
 create a new project and add a reference to the `Tradeniator.Strategy.Shared` and `Tradeniator.Shared` projects
-then in your `Program.cs` file 
-in the following example `StrategyImplementingType` is the name of the class that inherits from `StrategyBase` and implements the required methods
+then in your `Program.cs` file copy the following example.
+As reference the `StrategyImplementingType` type is the name of the class that inherits from `StrategyBase` and implements the required methods.
+This should be changed to the name of your class.
+
 ```csharp
-// load config from appsettings.json and .env
+
+// A readable ID that denotes this group of strategies
+// used for filtering your strategies in the dashboard and registering events
+const string StrategySlug = "StrategyGroupName";
+
+// load config from appsettings.json and .env files
 var configLoader = new ConfigurationLoader();
 
 var apiToken = configLoader.Get("OANDA_API_TOKEN");
