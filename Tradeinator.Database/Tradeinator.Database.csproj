@@ -7,12 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.1" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.1">
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.16" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.16">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="MySql.EntityFrameworkCore" Version="8.0.0" />
+      <PackageReference Include="MySql.EntityFrameworkCore" Version="7.0.14" />
     </ItemGroup>
 
     <ItemGroup>

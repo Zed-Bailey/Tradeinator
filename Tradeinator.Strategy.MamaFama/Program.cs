@@ -55,15 +55,16 @@ Console.CancelKeyPress += (sender, eventArgs) =>
     tokenSource.Cancel();
 };
 
+var barBindings = new[] { "bar.AUD/CHF" };
 
 // setup exchange
 using var exchange = new PublisherReceiverExchange(
     exchangeHost, exchangeName,
-    "bar.AUD/CHF"
+    barBindings
 );
 
 
-var strategies = new StrategyBuilder<MamaFama>(connectionString, logger)
+var strategies = new StrategyBuilder<MamaFama>(connectionString, logger, barBindings)
     .WithSlug(StrategySlug) // the slug of the strategy
     .WithExchange(exchange) // will register a listener to consume change events
     .WithMax(3) // max number of strategies that can be added
@@ -73,7 +74,7 @@ var strategies = new StrategyBuilder<MamaFama>(connectionString, logger)
 
 
 
-await strategies.Init(); // will initalise all the strategies
+// await strategies.Init(); // will initalise all the strategies
 
 logger.Information("Initialising strategies");
 logger.Information("initialised");
