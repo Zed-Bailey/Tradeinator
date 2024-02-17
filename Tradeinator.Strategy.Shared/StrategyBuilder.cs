@@ -22,13 +22,16 @@ public class StrategyBuilder<T>: IAsyncDisposable where T : StrategyBase, new()
     private string _connectionString;
     private string? _defaultSerialisedStrategy;
     private Logger _logger;
-    public Dictionary<int, T> LoadedStrategies = new(); 
+    public Dictionary<int, T> LoadedStrategies = new();
+
+    private EventStateHandler _esh;
+    private string[] _barBindings;
     
-    
-    public StrategyBuilder(string connectionString, Logger logger)
+    public StrategyBuilder(string connectionString, Logger logger, params string[] barBindings)
     {
         _connectionString = connectionString;
         _logger = logger;
+        _barBindings = barBindings;
     }
 
     /// <summary>
@@ -153,46 +156,19 @@ public class StrategyBuilder<T>: IAsyncDisposable where T : StrategyBase, new()
         // register consumer
         _exchange.ConsumerOnReceive += NewEventReceived;
         _logger.Information("Registered exchange consumers");
+        
+        _esh = new EventStateHandler()
+            .Default(o => Console.WriteLine($"Unknown event received : {o}"))
+            .If<Bar>(_barBindings[0], o => Console.WriteLine("bar received"))
+            .If<UpdateStrategyEvent>($"update.{_slug}", o => Console.WriteLine("update event received"));
+        
+        
         return this;
     }
 
     private void NewEventReceived(object? sender, BasicDeliverEventArgs e)
     {
-        var bar = e.DeserializeToModel<Bar>();
-        var update = e.DeserializeToModel<UpdateStrategyEvent>();
-        
-        // todo: update to switch case with cast?
-        
-        if (update != null)
-        {
-            _logger.Information("Received new strategy update event, {Event}", update);
-            var strategyToUpdate = LoadedStrategies[update.Id];
-            using var context = DbContextCreator.CreateContext(_connectionString);
-            var latest = context.SavedStrategies.Find(update.Id);
-            if (latest == null)
-            {
-                _logger.Error("tried to load latest strategy changes for strategy with id {Id} but the model was null", update.Id);
-                return;
-            }
-            
-            StrategyLoader.UpdateStrategyProperties(strategyToUpdate, latest.Config);
-            _logger.Information("Updated strategy with id {Id}", update.Id);
-        }
-        else if (bar != null)
-        {
-            _logger.Information("Received new bar, {Bar}", bar);
-            foreach (var value in LoadedStrategies.Values)
-            {
-                value.NewBar(bar);
-            }
-            _barCallback?.Invoke(this, e);
-        }
-        else
-        {
-            _logger.Warning("Received an unrecognised event, {Event}", e.BodyAsString());
-        }
-        
-
+        _esh.Consume(e.RoutingKey, e.BodyAsString());
     }
 
 
