@@ -8,7 +8,7 @@ public class EventStateHandler
     // key is the topic
     // value is a tuple containing the object type and the callback function
     private Dictionary<string, (Type ObjType, Action<object> Callback)> _events = new();
-    private Action<object>? _defaultCallback = null;
+    private Action<string>? _defaultCallback = null;
 
 
     /// <summary>
@@ -34,7 +34,7 @@ public class EventStateHandler
     /// </summary>
     /// <param name="defaultCallback">the action to invoke if an event that hasn't been registered is received</param>
     /// <returns></returns>
-    public EventStateHandler Default(Action<object> defaultCallback)
+    public EventStateHandler Default(Action<string> defaultCallback)
     {
         _defaultCallback = defaultCallback;
         
@@ -44,8 +44,8 @@ public class EventStateHandler
     /// <summary>
     /// Consume an object and call the corresponding callback
     /// </summary>
-    /// <param name="topic"></param>
-    /// <param name="json"></param>
+    /// <param name="topic">the routing key</param>
+    /// <param name="json">event body</param>
     /// <exception cref="ArgumentException">will throw if default callback is not registered</exception>
     public void Consume(string topic, string json)
     {
@@ -55,7 +55,7 @@ public class EventStateHandler
             // check if default callback has been registered before throwing an exception
             if(_defaultCallback != null)
             {
-                _defaultCallback.Invoke((topic, json));
+                _defaultCallback.Invoke($"topic = {topic}, json = {json}");
                 return;
             }
              
