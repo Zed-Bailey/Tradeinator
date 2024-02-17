@@ -158,8 +158,36 @@ public class StrategyBuilder<T>: IAsyncDisposable where T : StrategyBase, new()
         _logger.Information("Registered exchange consumers");
         
         _esh = new EventStateHandler()
-            .Default(o => Console.WriteLine($"Unknown event received : {o}"))
-            .If<Bar>(_barBindings[0], o => Console.WriteLine("bar received"))
+            .Default(eventData => _logger.Warning("Unknown event received: {Event}", eventData))
+            .If<Bar>(_barBindings[0], o =>
+            {
+                try
+                {
+                    
+                    var bar = (Bar?) o;
+                    _logger.Information("Received new bar, {Bar}", bar);
+                    if (bar == null)
+                    {
+                        _logger.Warning("Received bar was null after casting: {o}");
+                    }
+
+                    foreach (var strategy in LoadedStrategies.Values)
+                    {
+                        strategy.NewBar(bar);
+                    }
+                    
+                    // _barCallback?.Invoke(this, bar);
+                }
+                catch (InvalidCastException e)
+                {
+                    _logger.Error(e, "Failed to cast the object to the Bar type");
+                }
+                catch (Exception e)
+                {
+                    _logger.Error(e, "something threw an exception");
+                }
+                
+            })
             .If<UpdateStrategyEvent>($"update.{_slug}", o => Console.WriteLine("update event received"));
         
         

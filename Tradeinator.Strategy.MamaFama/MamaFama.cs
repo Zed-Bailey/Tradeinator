@@ -55,10 +55,6 @@ public class MamaFama : StrategyBase
        
         
         StrategyVersion = strategyName;
-        _logger = new LoggerConfiguration()
-            .WriteTo.Console()
-            .WriteTo.File($"{StrategyVersion}.log")
-            .CreateLogger();
         
         _oandaApiConnection = new OandaApiConnection(OandaConnectionType.FxPractice, _apiToken);
         _tradeManager = new OandaTradeManager(_apiToken);
@@ -67,6 +63,11 @@ public class MamaFama : StrategyBase
 
     public override async Task Init(ConfigurationLoader configuration)
     {
+        _logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .WriteTo.File($"{StrategyVersion}.log")
+            .CreateLogger();
+        
         var candles = await _oandaApiConnection
             .GetInstrument(InstrumentName.AUD_CHF)
             .GetLastNCandlesAsync(CandlestickGranularity.M30, 200);
