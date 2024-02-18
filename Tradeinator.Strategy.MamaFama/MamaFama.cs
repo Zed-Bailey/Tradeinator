@@ -17,8 +17,7 @@ namespace Tradeinator.Strategy.MamaFama;
 
 public class MamaFama : StrategyBase
 {
-    private string _accountId;
-    private string _apiToken;
+
 
     private List<TickerData> _data = new();
 
@@ -44,25 +43,28 @@ public class MamaFama : StrategyBase
     [SerialisableParameter]
     public string StrategyVersion { get; set; }
     //---------
+    
+    [SerialisableParameter]
+    public string AccountId { get; set; }
 
-    public MamaFama()
-    { }
+    
+    
 
-    public MamaFama(string accountId, string apiToken, string strategyName)
+    // todo refactor to use public properties
+    private string _accountId => AccountId;
+    private string _apiToken;
+    
+    public MamaFama() { }
+    
+
+    
+    public override async Task Init(ConfigurationLoader configuration)
     {
-        _accountId = accountId;
-        _apiToken = apiToken;
-       
-        
-        StrategyVersion = strategyName;
+        _apiToken = configuration["OANDA_API_TOKEN"] ?? throw new ArgumentNullException("Oanda api token was null");
         
         _oandaApiConnection = new OandaApiConnection(OandaConnectionType.FxPractice, _apiToken);
         _tradeManager = new OandaTradeManager(_apiToken);
         
-    }
-
-    public override async Task Init(ConfigurationLoader configuration)
-    {
         _logger = new LoggerConfiguration()
             .WriteTo.Console()
             .WriteTo.File($"{StrategyVersion}.log")
@@ -73,7 +75,7 @@ public class MamaFama : StrategyBase
             .GetLastNCandlesAsync(CandlestickGranularity.M30, 200);
         
         var candlesticks = candles.ToArray();
-        if (candles == null || !candlesticks.Any()) throw new Exception("candle data was not loaded in");
+        if (candles == null || !candlesticks.Any()) throw new Exception("candle data was not loaded in as it was null or empty");
 
         foreach (var candle in candlesticks.ToList())
         {
