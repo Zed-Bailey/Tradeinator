@@ -1,12 +1,7 @@
-﻿using RabbitMQ.Client.Events;
-using Serilog;
+﻿using Serilog;
 using Tradeinator.Configuration;
-using Tradeinator.Database;
-using Tradeinator.Database.Models;
 using Tradeinator.Shared;
 using Tradeinator.Shared.EventArgs;
-using Tradeinator.Shared.Extensions;
-using Tradeinator.Shared.Models;
 using Tradeinator.Strategy.MamaFama;
 using Tradeinator.Strategy.Shared;
 
