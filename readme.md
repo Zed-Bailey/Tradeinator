@@ -73,7 +73,12 @@ Options are then displayed allowing you to select which backtest to run (see ima
 
 <img src="docs/images/backtest_runner_example.png" title="an example of the options displayed to the user"/>
 
-Spectre.Console is used to pretty print options to the console
+`Spectre.Console` is used to pretty print options to the console
+
+### Improvements
+- update to use a sqlite database to load data from rather than reading from csv files
+- provide utility functionality to load data from csv into database
+- provide options to select a data source rather then passing as cli argument
 
 ## Tradeinator.Dashboard
 A blazor server web application built with the Microsofts Fluent UI.
