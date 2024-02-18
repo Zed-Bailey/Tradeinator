@@ -104,12 +104,24 @@ public class MamaFama : StrategyBase
         }
     }
 
+    private DateTime prevBarTime = DateTime.MinValue;
+    
     public override async void NewBar(Bar bar)
     {
         _logger.Information("New bar: {Bar}", bar);
         try
         {
-            await Execute(bar);
+            // handles the odd case where we get bars with the same time, price, etc..
+            if (bar.TimeUtc > prevBarTime)
+            {
+                prevBarTime = bar.TimeUtc;
+                await Execute(bar);
+            }
+            else
+            {
+                _logger.Warning("Received bar with same time as previous recorded time. prevBarTime={PrevBarTime}, newBarTime={NewBarTime}", prevBarTime, bar.TimeUtc);
+            }
+            
         }
         catch (Exception e)
         {
