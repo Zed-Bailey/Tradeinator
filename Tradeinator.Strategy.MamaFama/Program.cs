@@ -63,18 +63,23 @@ using var exchange = new PublisherReceiverExchange(
     barBindings
 );
 
+MamaFama defaultStrategy = new MamaFama
+{
+    UseSecondaryTrigger = false,
+    StrategyVersion = "MamaFamaV1"
+};
 
 var strategies = new StrategyBuilder<MamaFama>(connectionString, logger, barBindings)
     .WithSlug(StrategySlug) // the slug of the strategy
     .WithExchange(exchange) // will register a listener to consume change events
     .WithMax(3) // max number of strategies that can be added
     .WithMessageNotificationCallback(OnSendMessageNotification) // register a callback for the send message notification event
-    .WithDefaultStrategy(new MamaFama()) // register default strategy
+    .WithDefaultStrategy(defaultStrategy) // register default strategy
     .Build();
 
 
 
-// await strategies.Init(); // will initalise all the strategies
+await strategies.Init(); // will initalise all the strategies
 
 logger.Information("Initialising strategies");
 logger.Information("initialised");
