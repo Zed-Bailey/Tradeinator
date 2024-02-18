@@ -22,6 +22,8 @@ public class StrategyBuilder<T>: IAsyncDisposable where T : StrategyBase, new()
     private string _connectionString;
     private string? _defaultSerialisedStrategy;
     private Logger _logger;
+    
+    // key is strategy id
     public Dictionary<int, T> LoadedStrategies = new();
 
     private EventStateHandler _esh;
@@ -159,43 +161,72 @@ public class StrategyBuilder<T>: IAsyncDisposable where T : StrategyBase, new()
         
         _esh = new EventStateHandler()
             .Default(eventData => _logger.Warning("Unknown event received: {Event}", eventData))
-            .If<Bar>(_barBindings[0], o =>
-            {
-                try
-                {
-                    
-                    var bar = (Bar?) o;
-                    _logger.Information("Received new bar, {Bar}", bar);
-                    if (bar == null)
-                    {
-                        _logger.Warning("Received bar was null after casting: {o}");
-                    }
-
-                    foreach (var strategy in LoadedStrategies.Values)
-                    {
-                        strategy.NewBar(bar);
-                    }
-                    
-                    // _barCallback?.Invoke(this, bar);
-                }
-                catch (InvalidCastException e)
-                {
-                    _logger.Error(e, "Failed to cast the object to the Bar type");
-                }
-                catch (Exception e)
-                {
-                    _logger.Error(e, "something threw an exception");
-                }
-                
-            })
-            .If<UpdateStrategyEvent>($"update.{_slug}", o => Console.WriteLine("update event received"));
+            // todo add support for multiple bindings
+            .If<Bar>(_barBindings[0], HandleBarEvent)
+            .If<UpdateStrategyEvent>($"update.{_slug}", HandleUpdateEvent);
         
         
         return this;
     }
 
+    private void HandleUpdateEvent(object obj)
+    {
+        var updateEvent = (UpdateStrategyEvent?) obj;
+        if (updateEvent == null)
+        {
+            _logger.Warning("Received updateStrategyEvent was null after casting");
+            return;
+        }
+
+        using var context = DbContextCreator.CreateContext(_connectionString);
+        var strategyConfig = context.SavedStrategies.Find(updateEvent.Id);
+
+        if (strategyConfig == null)
+        {
+            _logger.Warning("Tried to load a saved strategy with id : {Id} and slug: {Slug} from database but got null", updateEvent.Id, updateEvent.Slug);
+            return;
+        }
+        
+        _logger.Information("Loaded saved strategy from database for event : {Event}", updateEvent);
+        
+        StrategyLoader.UpdateStrategyProperties(LoadedStrategies[updateEvent.Id], strategyConfig.Config);
+        _logger.Information("Updated strategy");
+    }
+
+    private void HandleBarEvent(object obj)
+    {
+        try
+        {
+                    
+            var bar = (Bar?) obj;
+            _logger.Information("Received new bar, {Bar}", bar);
+            if (bar == null)
+            {
+                _logger.Warning("Received bar was null after casting: {Obj}", obj);
+                return;
+            }
+
+            foreach (var strategy in LoadedStrategies.Values)
+            {
+                strategy.NewBar(bar);
+            }
+                    
+            // _barCallback?.Invoke(this, bar);
+        }
+        catch (InvalidCastException e)
+        {
+            _logger.Error(e, "Failed to cast the object to the Bar type");
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e, "something threw an exception");
+        }
+                
+    }
+
     private void NewEventReceived(object? sender, BasicDeliverEventArgs e)
     {
+        // use event state handler to consume object
         _esh.Consume(e.RoutingKey, e.BodyAsString());
     }
 
