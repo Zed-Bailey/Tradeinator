@@ -12,18 +12,11 @@ const string StrategySlug = "MAMAFAMA";
 // load config
 var configLoader = new ConfigurationLoader();
 
-var strategyVersion1 = configLoader.Get("MamaFama:Accounts:SV1");
-var strategyVersion2 = configLoader.Get("MamaFama:Accounts:SV2");
-var strategyVersion3 = configLoader.Get("MamaFama:Accounts:SV3");
+
 var exchangeHost = configLoader.Get("Rabbit:Host");
 var exchangeName = configLoader.Get("Rabbit:Exchange");
 var connectionString = configLoader.Get("ConnectionStrings:DbConnection");
 
-if (ValidateNotNull(strategyVersion1, strategyVersion2, strategyVersion3))
-{
-    Console.WriteLine("[ERROR] empty account number(s)");
-    return;
-}
 
 if (ValidateNotNull(exchangeHost, exchangeName))
 {
