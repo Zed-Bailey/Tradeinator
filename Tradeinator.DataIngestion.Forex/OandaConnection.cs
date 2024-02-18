@@ -21,14 +21,20 @@ public class OandaConnection
     }
 
 
-    public async Task<Bar?> GetLatestData(string symbol)
+    /// <summary>
+    /// Gets the latest bar for the instrument
+    /// </summary>
+    /// <param name="symbol">instrument symbol eg. AUD/USD </param>
+    /// <param name="granularity">granularity of data</param>
+    /// <returns>The latest bar. null if symbol could not be parsed or the latest candle is null</returns>
+    public async Task<Bar?> GetLatestData(string symbol, CandlestickGranularity granularity = CandlestickGranularity.M30)
     {
         // converts AUD/CHF => AUD_CHF which matches enum naming so it can be parsed
         var cleaned = symbol.Replace("/", "_");
         if (!Enum.TryParse<InstrumentName>(cleaned, out var iName)) return null;
 
         var  candle = await _connection.GetInstrument(iName)
-            .GetLastNCandlesAsync(CandlestickGranularity.M30, 1);
+            .GetLastNCandlesAsync(granularity, 1);
         
         // var candle = await _connection.InstrumentApi.GetInstrumentCandlesAsync(
         //     iName,
