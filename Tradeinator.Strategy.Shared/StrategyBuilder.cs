@@ -187,10 +187,24 @@ public class StrategyBuilder<T>: IAsyncDisposable where T : StrategyBase, new()
             return;
         }
         
-        _logger.Information("Loaded saved strategy from database for event : {Event}", updateEvent);
+        if(LoadedStrategies.ContainsKey(updateEvent.Id)) {
+            _logger.Information("Loaded saved strategy from database for event : {Event}", updateEvent);
         
-        StrategyLoader.UpdateStrategyProperties(LoadedStrategies[updateEvent.Id], strategyConfig.Config);
-        _logger.Information("Updated strategy");
+            StrategyLoader.UpdateStrategyProperties(LoadedStrategies[updateEvent.Id], strategyConfig.Config);
+            _logger.Information("Updated strategy");
+        }
+        else {
+            _logger.Information("Strategy with id: {Id} has not been loaded yet, event: {Event}", updateEvent.Id, updateEvent);
+            // new strategy was created
+            LoadedStrategies[strategyConfig.SavedStrategyId] = StrategyLoader.LoadStrategy<T>(strategyConfig.Config);
+            _logger.Information("Loaded new strategy");
+            var configuration = new ConfigurationLoader();
+            LoadedStrategies[strategyConfig.SavedStrategyId].Init(configuration).Wait();
+            _logger.Information("Finished initialising the new strategy");
+        }
+
+
+        
     }
 
     private void HandleBarEvent(object obj)
