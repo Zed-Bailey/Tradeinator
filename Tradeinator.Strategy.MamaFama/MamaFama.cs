@@ -45,7 +45,7 @@ public class MamaFama : StrategyBase
     //---------
     
     [SerialisableParameter]
-    public string AccountId;
+    public string AccountId { get; set; }
     
     private string _apiToken;
     
