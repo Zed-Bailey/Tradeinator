@@ -43,7 +43,7 @@ Console.CancelKeyPress += (sender, eventArgs) =>
     tokenSource.Cancel();
 };
 
-var barBindings = new[] { "bar.AUD/CHF" };
+var barBindings = new[] { "bar.AUD/CHF", "bar.XAU/AUD" };
 
 // setup exchange
 using var exchange = new PublisherReceiverExchange(

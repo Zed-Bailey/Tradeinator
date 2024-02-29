@@ -99,7 +99,7 @@ public class MamaFama : StrategyBase
         }
     }
 
-    private DateTime prevBarTime = DateTime.MinValue;
+    private DateTime _prevBarTime = DateTime.MinValue;
     
     public override async void NewBar(Bar bar)
     {
@@ -107,14 +107,14 @@ public class MamaFama : StrategyBase
         try
         {
             // handles the odd case where we get bars with the same time, price, etc..
-            if (bar.TimeUtc > prevBarTime)
+            if (bar.TimeUtc > _prevBarTime)
             {
-                prevBarTime = bar.TimeUtc;
+                _prevBarTime = bar.TimeUtc;
                 await Execute(bar);
             }
             else
             {
-                _logger.Warning("Received bar with same time as previous recorded time. prevBarTime={PrevBarTime}, newBarTime={NewBarTime}", prevBarTime, bar.TimeUtc);
+                _logger.Warning("Received bar with same time as previous recorded time. prevBarTime={PrevBarTime}, newBarTime={NewBarTime}", _prevBarTime, bar.TimeUtc);
             }
             
         }
@@ -197,7 +197,7 @@ public class MamaFama : StrategyBase
             {
                 // tradeId = state.Trade.Margin.Long(AmountType.Absolute, state.BaseBalance * borrowAmount);
                 
-                var pos = await _tradeManager.OpenLongPosition(AccountId, borrowAmount, adaptiveTs);
+                var pos = await _tradeManager.OpenLongPosition(AccountId, "AUD_CHF" , borrowAmount, adaptiveTs);
                 if (string.IsNullOrEmpty(pos.ErrorCode))
                 {
                     _transactionId = pos.OrderFillTransaction.TradeOpened.TradeID.ToString();
@@ -226,7 +226,7 @@ public class MamaFama : StrategyBase
             
             if (!_tradeOpen)
             {
-                var pos = await _tradeManager.OpenShortPosition(AccountId, borrowAmount, adaptiveTs);
+                var pos = await _tradeManager.OpenShortPosition(AccountId, "AUD_CHF" ,borrowAmount, adaptiveTs);
                 if (string.IsNullOrEmpty(pos.ErrorCode))
                 {
                     
@@ -263,7 +263,7 @@ public class MamaFama : StrategyBase
         {
             if (!_tradeOpen)
             {
-                var pos = await _tradeManager.OpenLongPosition(AccountId, borrowAmount, adaptiveSl);
+                var pos = await _tradeManager.OpenLongPosition(AccountId, "AUD_CHF" ,borrowAmount, adaptiveSl);
                 if (string.IsNullOrEmpty(pos.ErrorCode))
                 {
                     _isLong = true;

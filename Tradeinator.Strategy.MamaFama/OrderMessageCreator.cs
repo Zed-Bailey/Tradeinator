@@ -62,29 +62,10 @@ public class OrderMessageCreator
             Symbol = "AUD/CHF",
             StrategyName = strategy,
             Message = $"""
-                       Closed long position.
-                       closed order = {response.LongOrderCreateTransaction.BatchID}
-                       close price = {response.LongOrderFillTransaction.Price}
-                       units = {response.LongOrderFillTransaction.Units}
-                       P/L = $ {response.LongOrderFillTransaction.Pl}
-                       Account Balance = $ {response.LongOrderFillTransaction.AccountBalance}
-                       Commission = $ {response.LongOrderFillTransaction.Commission}
+                       Closed {(isLongPosition ? "long" : "short")} position.
+                       {response.ToJson()}
                        """
         };
-
-        if(!isLongPosition)
-        {
-            msg.Message = $"""
-                           Closed short position.
-                           closed order = {response.ShortOrderCreateTransaction.BatchID}
-                           close price = {response.ShortOrderFillTransaction.Price}
-                           units = {response.ShortOrderFillTransaction.Units}
-                           P/L = $ {response.ShortOrderFillTransaction.Pl}
-                           Account Balance = $ {response.ShortOrderFillTransaction.AccountBalance}
-                           Commission = $ {response.ShortOrderFillTransaction.Commission}
-                           """;
-        }
-
 
         return msg;
 

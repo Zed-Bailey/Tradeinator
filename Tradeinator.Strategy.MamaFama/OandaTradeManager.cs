@@ -40,19 +40,12 @@ public class OandaTradeManager
         return res;
     }
 
-    public Task<CreateOrderResponse> OpenLongPosition(string accountId, double units, double stopLossPrice)
+    public Task<CreateOrderResponse> OpenLongPosition(string accountId, string instrumentName, double units, double stopLossPrice)
     {
-        
-        
-        var order = new MarketOrder(
-            InstrumentName.AUD_CHF,
-            units
-        );
-        
         var orderRequest = new CreateOrderRequest(new
         {
-            Instrument = order.Instrument,
-            Units = double.Floor(order.Units).ToString(),
+            Instrument = instrumentName,
+            Units = double.Floor(units).ToString(),
             StopLossOnFill = new
             {
                 // has to be a string other will get the STOP_LOSS_ON_FILL_PRICE_PRECISION_EXCEEDED error
@@ -66,19 +59,12 @@ public class OandaTradeManager
     }
     
     
-    public Task<CreateOrderResponse> OpenShortPosition(string account, double units, double stopLossPrice)
+    public Task<CreateOrderResponse> OpenShortPosition(string account, string instrumentName, double units, double stopLossPrice)
     {
-
-
-        var order = new MarketOrder(
-            InstrumentName.AUD_CHF,
-            units * -1 // short needs to be negative
-        );
-
         var orderRequest = new CreateOrderRequest(new
         {
-            Instrument = order.Instrument,
-            Units = double.Floor(order.Units).ToString(),
+            Instrument = instrumentName,
+            Units = double.Floor(units * -1).ToString(),
             StopLossOnFill = new
             {
                 // has to be a string other will get the STOP_LOSS_ON_FILL_PRICE_PRECISION_EXCEEDED error
@@ -87,7 +73,7 @@ public class OandaTradeManager
             },
             Type = "MARKET"
         });
-
+        
         return _oandaApiConnection.OrderApi.CreateOrderAsync(account, orderRequest);
     }
 }

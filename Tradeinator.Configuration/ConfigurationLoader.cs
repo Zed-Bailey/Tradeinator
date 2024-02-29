@@ -7,6 +7,8 @@ public class ConfigurationLoader
 {
     private IConfiguration _configuration;
     private string _directory = AppContext.BaseDirectory;
+
+    public IConfiguration Configuration => _configuration;
     
     /// <summary>
     /// Allows the use of an indexer same as on IConfiguration
