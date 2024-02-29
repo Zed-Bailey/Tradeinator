@@ -7,12 +7,12 @@ namespace Tradeinator.DataIngestion.Forex;
 
 public class PullDataInvocable : IInvocable
 {
-    private ForexSubscriptionManager _subscriptionManager;
+    private SimpleSubscriptionManager _subscriptionManager;
     private PublisherExchange _exchange;
     private Logger _logger;
     private OandaConnection _oandaConnection;
     
-    public PullDataInvocable(ForexSubscriptionManager subscriptionManager, PublisherExchange exchange, Logger logger, OandaConnection oandaConnection)
+    public PullDataInvocable(SimpleSubscriptionManager subscriptionManager, PublisherExchange exchange, Logger logger, OandaConnection oandaConnection)
     {
         _subscriptionManager = subscriptionManager;
         _exchange = exchange;
