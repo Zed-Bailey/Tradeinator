@@ -2,7 +2,10 @@ using Serilog.Core;
 
 namespace Tradeinator.DataIngestion.Shared;
 
-public class ForexSubscriptionManager
+/// <summary>
+/// A simple subscription manager, simply watches a file and splits on the new line
+/// </summary>
+public class SimpleSubscriptionManager
 {
 
 
@@ -12,7 +15,7 @@ public class ForexSubscriptionManager
     private FileSystemWatcher _fileSystemWatcher;
     private Logger _logger;
     private string _directoryPath;
-    public ForexSubscriptionManager(Logger logger, string directoryPath, string symbolsFileName)
+    public SimpleSubscriptionManager(Logger logger, string directoryPath, string symbolsFileName)
     {
         
         _logger = logger;

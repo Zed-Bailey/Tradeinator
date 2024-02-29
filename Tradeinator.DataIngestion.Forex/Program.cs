@@ -26,7 +26,7 @@ await using var logger = new LoggerConfiguration()
 
 
 //
-var subscriptionManager = new ForexSubscriptionManager(logger, Directory.GetCurrentDirectory(), "symbols.txt");
+var subscriptionManager = new SimpleSubscriptionManager(logger, Directory.GetCurrentDirectory(), "symbols.txt");
 
 var apiToken = config.Get("OANDA_API_TOKEN") ?? throw new ArgumentException("Oanda api token was null or empty");
 var oandaConnection = new OandaConnection(apiToken);
