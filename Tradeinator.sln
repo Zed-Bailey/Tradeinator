@@ -32,6 +32,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Strategy.Test",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.Database", "Tradeinator.Database\Tradeinator.Database.csproj", "{4FD69933-B061-4476-A8C5-26C013794172}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tradeinator.DataIngestion.Commodity", "Tradeinator.DataIngestion.Commodity\Tradeinator.DataIngestion.Commodity.csproj", "{47EB9160-B1D5-418D-ACD9-F44A905A1877}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -102,5 +104,9 @@ Global
 		{4FD69933-B061-4476-A8C5-26C013794172}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FD69933-B061-4476-A8C5-26C013794172}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4FD69933-B061-4476-A8C5-26C013794172}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47EB9160-B1D5-418D-ACD9-F44A905A1877}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47EB9160-B1D5-418D-ACD9-F44A905A1877}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47EB9160-B1D5-418D-ACD9-F44A905A1877}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47EB9160-B1D5-418D-ACD9-F44A905A1877}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

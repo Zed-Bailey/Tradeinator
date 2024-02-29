@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>dotnet-Tradeinator.DataIngestion.Commodity-056A4801-C771-4506-B9D5-AF87F555544D</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Coravel" Version="5.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0"/>
+        <PackageReference Include="Serilog" Version="3.1.1" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Tradeinator.Configuration\Tradeinator.Configuration.csproj" />
+      <ProjectReference Include="..\Tradeinator.DataIngestion.Shared\Tradeinator.DataIngestion.Shared.csproj" />
+      <ProjectReference Include="..\Tradeinator.Shared\Tradeinator.Shared.csproj" />
+    </ItemGroup>
+</Project>
