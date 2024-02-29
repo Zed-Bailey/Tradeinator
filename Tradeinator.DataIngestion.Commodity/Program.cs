@@ -20,7 +20,7 @@ if (exchangeHost is null || exchangeName is null)
 // initialise serilog logger, writing to console and file
 await using var logger = new LoggerConfiguration()
     .WriteTo.Console()
-    // .WriteTo.File("data_ingestion.log")
+    .WriteTo.File("data_ingestion.log")
     .CreateLogger();
 
 
