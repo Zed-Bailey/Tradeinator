@@ -1,8 +1,8 @@
-﻿using Coravel;
-using Serilog;
+using Coravel;
 using Tradeinator.Configuration;
-using Tradeinator.DataIngestion.Forex;
+using Tradeinator.DataIngestion.Commodity;
 using Tradeinator.DataIngestion.Shared;
+using Serilog;
 using Tradeinator.Shared;
 
 var config = new ConfigurationLoader();
@@ -30,6 +30,7 @@ var subscriptionManager = new SimpleSubscriptionManager(logger, Directory.GetCur
 
 var apiToken = config.Get("OANDA_API_TOKEN") ?? throw new ArgumentException("Oanda api token was null or empty");
 var oandaConnection = new OandaConnection(apiToken);
+
 
 var builder = Host.CreateApplicationBuilder(args);
 

@@ -17,8 +17,7 @@ namespace Tradeinator.Strategy.MamaFama;
 
 public class MamaFama : StrategyBase
 {
-    private string _accountId;
-    private string _apiToken;
+
 
     private List<TickerData> _data = new();
 
@@ -44,25 +43,23 @@ public class MamaFama : StrategyBase
     [SerialisableParameter]
     public string StrategyVersion { get; set; }
     //---------
+    
+    [SerialisableParameter]
+    public string AccountId { get; set; }
+    
+    private string _apiToken;
+    
+    public MamaFama() { }
+    
 
-    public MamaFama()
-    { }
-
-    public MamaFama(string accountId, string apiToken, string strategyName)
+    
+    public override async Task Init(ConfigurationLoader configuration)
     {
-        _accountId = accountId;
-        _apiToken = apiToken;
-       
-        
-        StrategyVersion = strategyName;
+        _apiToken = configuration["OANDA_API_TOKEN"] ?? throw new ArgumentNullException("Oanda api token was null");
         
         _oandaApiConnection = new OandaApiConnection(OandaConnectionType.FxPractice, _apiToken);
         _tradeManager = new OandaTradeManager(_apiToken);
         
-    }
-
-    public override async Task Init(ConfigurationLoader configuration)
-    {
         _logger = new LoggerConfiguration()
             .WriteTo.Console()
             .WriteTo.File($"{StrategyVersion}.log")
@@ -73,7 +70,7 @@ public class MamaFama : StrategyBase
             .GetLastNCandlesAsync(CandlestickGranularity.M30, 200);
         
         var candlesticks = candles.ToArray();
-        if (candles == null || !candlesticks.Any()) throw new Exception("candle data was not loaded in");
+        if (candles == null || !candlesticks.Any()) throw new Exception("candle data was not loaded in as it was null or empty");
 
         foreach (var candle in candlesticks.ToList())
         {
@@ -95,19 +92,31 @@ public class MamaFama : StrategyBase
     private async void PositionNotOpenAnymore(string id)
     {
         _logger.Information("stop loss triggered for trade {Id}", id);
-        var trade = await _oandaApiConnection.TradeApi.GetTradeAsync(_accountId, id);
+        var trade = await _oandaApiConnection.TradeApi.GetTradeAsync(AccountId, id);
         if (trade.Trade.StopLossOrder.State is OrderState.TRIGGERED or OrderState.FILLED)
         {
             OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateStopLossTriggeredMessage(StrategyVersion, trade.Trade)));
         }
     }
 
+    private DateTime _prevBarTime = DateTime.MinValue;
+    
     public override async void NewBar(Bar bar)
     {
         _logger.Information("New bar: {Bar}", bar);
         try
         {
-            await Execute(bar);
+            // handles the odd case where we get bars with the same time, price, etc..
+            if (bar.TimeUtc > _prevBarTime)
+            {
+                _prevBarTime = bar.TimeUtc;
+                await Execute(bar);
+            }
+            else
+            {
+                _logger.Warning("Received bar with same time as previous recorded time. prevBarTime={PrevBarTime}, newBarTime={NewBarTime}", _prevBarTime, bar.TimeUtc);
+            }
+            
         }
         catch (Exception e)
         {
@@ -135,13 +144,13 @@ public class MamaFama : StrategyBase
         
         _data.RemoveAt(0);
 
-        var account = await _oandaApiConnection.GetAccount(_accountId).GetSummaryAsync();
+        var account = await _oandaApiConnection.GetAccount(AccountId).GetSummaryAsync();
         _accountBalance = account.Balance;
         
         
         if (_tradeOpen)
         {
-            var openPositions = await _oandaApiConnection.PositionApi.GetOpenPositionsAsync(_accountId);
+            var openPositions = await _oandaApiConnection.PositionApi.GetOpenPositionsAsync(AccountId);
             // stop loss was triggered?
             if (!openPositions.Positions.Any())
             {
@@ -180,7 +189,7 @@ public class MamaFama : StrategyBase
             if (_tradeOpen && !_isLong)
             {
                 _logger.Information("fama crossed over mama, closing short position {Id}", _transactionId);
-                var pos = await _tradeManager.ClosePosition(_accountId, false);
+                var pos = await _tradeManager.ClosePosition(AccountId, false);
                 OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateClosePositionMessage(StrategyVersion,pos, isLongPosition: false)));
                 _tradeOpen = false;
             }
@@ -188,7 +197,7 @@ public class MamaFama : StrategyBase
             {
                 // tradeId = state.Trade.Margin.Long(AmountType.Absolute, state.BaseBalance * borrowAmount);
                 
-                var pos = await _tradeManager.OpenLongPosition(_accountId, borrowAmount, adaptiveTs);
+                var pos = await _tradeManager.OpenLongPosition(AccountId, "AUD_CHF" , borrowAmount, adaptiveTs);
                 if (string.IsNullOrEmpty(pos.ErrorCode))
                 {
                     _transactionId = pos.OrderFillTransaction.TradeOpened.TradeID.ToString();
@@ -210,14 +219,14 @@ public class MamaFama : StrategyBase
             if (_tradeOpen && _isLong)
             {
                 _logger.Information("fama crossed under mama, closing long position {Id}", _transactionId);
-                var closePos = await _tradeManager.ClosePosition(_accountId);
+                var closePos = await _tradeManager.ClosePosition(AccountId);
                 OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateClosePositionMessage(StrategyVersion,closePos, isLongPosition: true)));
                 _tradeOpen = false;
             }
             
             if (!_tradeOpen)
             {
-                var pos = await _tradeManager.OpenShortPosition(_accountId, borrowAmount, adaptiveTs);
+                var pos = await _tradeManager.OpenShortPosition(AccountId, "AUD_CHF" ,borrowAmount, adaptiveTs);
                 if (string.IsNullOrEmpty(pos.ErrorCode))
                 {
                     
@@ -254,7 +263,7 @@ public class MamaFama : StrategyBase
         {
             if (!_tradeOpen)
             {
-                var pos = await _tradeManager.OpenLongPosition(_accountId, borrowAmount, adaptiveSl);
+                var pos = await _tradeManager.OpenLongPosition(AccountId, "AUD_CHF" ,borrowAmount, adaptiveSl);
                 if (string.IsNullOrEmpty(pos.ErrorCode))
                 {
                     _isLong = true;
@@ -274,7 +283,7 @@ public class MamaFama : StrategyBase
             if (_tradeOpen && _isLong)
             {
                 _logger.Information("close price crossed under rrsi, closing long position {Id}", _transactionId);
-                var closePos = await _tradeManager.ClosePosition(_accountId);
+                var closePos = await _tradeManager.ClosePosition(AccountId);
                 OnSendMessage(new SystemMessageEventArgs(OrderMessageCreator.CreateClosePositionMessage(StrategyVersion,closePos, isLongPosition: true)));
                 _tradeOpen = false;
             }
@@ -287,11 +296,11 @@ public class MamaFama : StrategyBase
         // add 5 pip take profit to the open trade
         if (_tradeOpen)
         {
-            var trade = await _oandaApiConnection.TradeApi.GetTradeAsync(_accountId, _transactionId);
+            var trade = await _oandaApiConnection.TradeApi.GetTradeAsync(AccountId, _transactionId);
             // if position has profit, close
             if (trade.Trade.UnrealizedPL > 0)
             {
-                await _tradeManager.ClosePosition(_accountId, _isLong);
+                await _tradeManager.ClosePosition(AccountId, _isLong);
                 return;
             }
             
@@ -308,7 +317,7 @@ public class MamaFama : StrategyBase
                 takeProfitPrice = opened + (5 * 0.0001);
             }
 
-            await _oandaApiConnection.TradeApi.SetTradeOrdersAsync(_accountId, _transactionId,
+            await _oandaApiConnection.TradeApi.SetTradeOrdersAsync(AccountId, _transactionId,
                 new DependentTradeOrdersRequest(
                     takeProfit: new TakeProfitDetails(
                         price: takeProfitPrice

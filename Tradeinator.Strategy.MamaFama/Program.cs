@@ -1,12 +1,7 @@
-﻿using RabbitMQ.Client.Events;
-using Serilog;
+﻿using Serilog;
 using Tradeinator.Configuration;
-using Tradeinator.Database;
-using Tradeinator.Database.Models;
 using Tradeinator.Shared;
 using Tradeinator.Shared.EventArgs;
-using Tradeinator.Shared.Extensions;
-using Tradeinator.Shared.Models;
 using Tradeinator.Strategy.MamaFama;
 using Tradeinator.Strategy.Shared;
 
@@ -17,18 +12,11 @@ const string StrategySlug = "MAMAFAMA";
 // load config
 var configLoader = new ConfigurationLoader();
 
-var strategyVersion1 = configLoader.Get("MamaFama:Accounts:SV1");
-var strategyVersion2 = configLoader.Get("MamaFama:Accounts:SV2");
-var strategyVersion3 = configLoader.Get("MamaFama:Accounts:SV3");
+
 var exchangeHost = configLoader.Get("Rabbit:Host");
 var exchangeName = configLoader.Get("Rabbit:Exchange");
 var connectionString = configLoader.Get("ConnectionStrings:DbConnection");
 
-if (ValidateNotNull(strategyVersion1, strategyVersion2, strategyVersion3))
-{
-    Console.WriteLine("[ERROR] empty account number(s)");
-    return;
-}
 
 if (ValidateNotNull(exchangeHost, exchangeName))
 {
@@ -55,7 +43,7 @@ Console.CancelKeyPress += (sender, eventArgs) =>
     tokenSource.Cancel();
 };
 
-var barBindings = new[] { "bar.AUD/CHF" };
+var barBindings = new[] { "bar.AUD/CHF", "bar.XAU/AUD" };
 
 // setup exchange
 using var exchange = new PublisherReceiverExchange(
@@ -63,18 +51,23 @@ using var exchange = new PublisherReceiverExchange(
     barBindings
 );
 
+MamaFama defaultStrategy = new MamaFama
+{
+    UseSecondaryTrigger = false,
+    StrategyVersion = "MamaFamaV1"
+};
 
 var strategies = new StrategyBuilder<MamaFama>(connectionString, logger, barBindings)
     .WithSlug(StrategySlug) // the slug of the strategy
     .WithExchange(exchange) // will register a listener to consume change events
     .WithMax(3) // max number of strategies that can be added
     .WithMessageNotificationCallback(OnSendMessageNotification) // register a callback for the send message notification event
-    .WithDefaultStrategy(new MamaFama()) // register default strategy
+    .WithDefaultStrategy(defaultStrategy) // register default strategy
     .Build();
 
 
 
-// await strategies.Init(); // will initalise all the strategies
+await strategies.Init(); // will initalise all the strategies
 
 logger.Information("Initialising strategies");
 logger.Information("initialised");
