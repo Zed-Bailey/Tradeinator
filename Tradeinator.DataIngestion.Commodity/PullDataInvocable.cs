@@ -26,17 +26,20 @@ public class PullDataInvocable : IInvocable
     /// <returns>true when market is open, false otherwise</returns>
     private bool CheckTime()
     {
-        var time = DateTime.UtcNow;
+        var time = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "America/New_York");
+        
+        // closes friday at 16:59
+        if (time.DayOfWeek is DayOfWeek.Friday && time.Hour > 17) return false;
+        
         // market is not open on saturday
         if (time.DayOfWeek is DayOfWeek.Saturday) return false;
-            
-        // market closes friday at 5pm ET or 10pm UTC
-        if (time.DayOfWeek is DayOfWeek.Friday && time.Hour >= 22) return false;
-            
-        // market opens on sunday at 5pm ET or 10pm UTC
-        if(time.DayOfWeek is DayOfWeek.Sunday && time.Hour >= 22) return true;
-            
-            
+
+        // opens sunday at 18:05
+        if (time.DayOfWeek is DayOfWeek.Sunday && time.Hour >= 18 && time.Minute > 5) return true;
+        
+        
+        
+        // otherwise open 24 hours a day
         return true;
     }
     
