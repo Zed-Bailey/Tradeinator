@@ -50,9 +50,10 @@ public class OandaConnection
     /// <returns>The latest bar. null if symbol could not be parsed or the latest candle is null</returns>
     public async Task<Bar?> GetLatestData(string symbol, string granularity = "M30", int count = 1)
     {
+        var cleanedSymbol = symbol.Replace('/', '_');
         
         var candlesResponse = await _sharedClient.GetAsync(
-            $"instruments/{symbol}/candles?count={count}&price=M&granularity={granularity}");
+            $"instruments/{cleanedSymbol}/candles?count={count}&price=M&granularity={granularity}");
 
 
         if (candlesResponse.StatusCode != HttpStatusCode.OK)
