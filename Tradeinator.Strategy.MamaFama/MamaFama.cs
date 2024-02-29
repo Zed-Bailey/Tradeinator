@@ -46,6 +46,10 @@ public class MamaFama : StrategyBase
     
     [SerialisableParameter]
     public string AccountId { get; set; }
+
+    [SerialisableParameter]
+    public int StopLossInPips { get; set; } = 25;
+    
     
     private string _apiToken;
     
@@ -182,7 +186,7 @@ public class MamaFama : StrategyBase
         var borrowMultipler = isTrending ? 2.0 : 1.25;
         var borrowAmount = _accountBalance * borrowMultipler;
         
-        var adaptiveTs = stockData.CalculateAdaptiveTrailingStop().LatestValue("Ts");
+        // var adaptiveTs = stockData.CalculateAdaptiveTrailingStop().LatestValue("Ts");
         // mama has crossed from below
         if (famaMamaCrossOver)
         {
@@ -195,9 +199,9 @@ public class MamaFama : StrategyBase
             }
             if (!_tradeOpen)
             {
-                // tradeId = state.Trade.Margin.Long(AmountType.Absolute, state.BaseBalance * borrowAmount);
                 
-                var pos = await _tradeManager.OpenLongPosition(AccountId, "AUD_CHF" , borrowAmount, adaptiveTs);
+                var pos = await _tradeManager.OpenLongPosition(AccountId, "AUD_CHF" , borrowAmount, StopLossInPips);
+
                 if (string.IsNullOrEmpty(pos.ErrorCode))
                 {
                     _transactionId = pos.OrderFillTransaction.TradeOpened.TradeID.ToString();
@@ -226,7 +230,9 @@ public class MamaFama : StrategyBase
             
             if (!_tradeOpen)
             {
-                var pos = await _tradeManager.OpenShortPosition(AccountId, "AUD_CHF" ,borrowAmount, adaptiveTs);
+                var pos = await _tradeManager.OpenShortPosition(AccountId, "AUD_CHF" ,borrowAmount, StopLossInPips);
+
+
                 if (string.IsNullOrEmpty(pos.ErrorCode))
                 {
                     
@@ -244,13 +250,13 @@ public class MamaFama : StrategyBase
 
         if (UseSecondaryTrigger)
         {
-            await SecondaryTrigger(stockData, borrowAmount, adaptiveTs);    
+            await SecondaryTrigger(stockData, borrowAmount);    
         }
         
     }
 
 
-    private async Task SecondaryTrigger(StockData stockData, double borrowAmount, double adaptiveSl)
+    private async Task SecondaryTrigger(StockData stockData, double borrowAmount)
     {
         stockData.Clear();
         
@@ -263,7 +269,8 @@ public class MamaFama : StrategyBase
         {
             if (!_tradeOpen)
             {
-                var pos = await _tradeManager.OpenLongPosition(AccountId, "AUD_CHF" ,borrowAmount, adaptiveSl);
+                var pos = await _tradeManager.OpenLongPosition(AccountId, "AUD_CHF" ,borrowAmount, StopLossInPips);
+                
                 if (string.IsNullOrEmpty(pos.ErrorCode))
                 {
                     _isLong = true;

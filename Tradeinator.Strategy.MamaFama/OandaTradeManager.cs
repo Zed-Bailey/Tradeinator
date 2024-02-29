@@ -40,8 +40,10 @@ public class OandaTradeManager
         return res;
     }
 
-    public Task<CreateOrderResponse> OpenLongPosition(string accountId, string instrumentName, double units, double stopLossPrice)
+
+    public Task<CreateOrderResponse> OpenLongPosition(string accountId, string instrumentName, double units, int stopLossPips)
     {
+        
         var orderRequest = new CreateOrderRequest(new
         {
             Instrument = instrumentName,
@@ -50,7 +52,7 @@ public class OandaTradeManager
             {
                 // has to be a string other will get the STOP_LOSS_ON_FILL_PRICE_PRECISION_EXCEEDED error
                 // see -> https://developer.oanda.com/rest-live-v20/troubleshooting-errors/#PRECISION_EXCEEDED
-                price = double.Round(stopLossPrice, 5).ToString() 
+                distance = stopLossPips.ToString() 
             },
             Type = "MARKET"
         });
@@ -59,7 +61,9 @@ public class OandaTradeManager
     }
     
     
-    public Task<CreateOrderResponse> OpenShortPosition(string account, string instrumentName, double units, double stopLossPrice)
+
+
+    public Task<CreateOrderResponse> OpenShortPosition(string account, string instrumentName, double units, int stopLossPips)
     {
         var orderRequest = new CreateOrderRequest(new
         {
@@ -69,7 +73,7 @@ public class OandaTradeManager
             {
                 // has to be a string other will get the STOP_LOSS_ON_FILL_PRICE_PRECISION_EXCEEDED error
                 // see -> https://developer.oanda.com/rest-live-v20/troubleshooting-errors/#PRECISION_EXCEEDED
-                price = double.Round(stopLossPrice, 5).ToString() 
+                distance = stopLossPips.ToString() 
             },
             Type = "MARKET"
         });
